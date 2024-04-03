@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParsingProject", "ParsingProject\ParsingProject.csproj", "{9FC77E76-FA44-4981-9201-920AB7C85D63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParsingProject.DAL", "ParsingProject.DAL\ParsingProject.DAL.csproj", "{6940A6A7-9285-44FD-A42F-076724981FA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParsingProject.BLL", "ParsingProject.BLL\ParsingProject.BLL.csproj", "{F36DE949-2052-45AE-AD87-0C8327DD1B94}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9FC77E76-FA44-4981-9201-920AB7C85D63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FC77E76-FA44-4981-9201-920AB7C85D63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FC77E76-FA44-4981-9201-920AB7C85D63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FC77E76-FA44-4981-9201-920AB7C85D63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6940A6A7-9285-44FD-A42F-076724981FA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6940A6A7-9285-44FD-A42F-076724981FA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6940A6A7-9285-44FD-A42F-076724981FA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6940A6A7-9285-44FD-A42F-076724981FA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F36DE949-2052-45AE-AD87-0C8327DD1B94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F36DE949-2052-45AE-AD87-0C8327DD1B94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F36DE949-2052-45AE-AD87-0C8327DD1B94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F36DE949-2052-45AE-AD87-0C8327DD1B94}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
