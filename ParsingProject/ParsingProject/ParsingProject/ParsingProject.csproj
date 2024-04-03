@@ -15,4 +15,11 @@
       <ProjectReference Include="..\ParsingProject.BLL\ParsingProject.BLL.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="DTO" />
+      <Folder Include="Extensions" />
+      <Folder Include="Middlewares" />
+      <Folder Include="Validators" />
+    </ItemGroup>
+
 </Project>
