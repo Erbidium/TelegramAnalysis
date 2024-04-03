@@ -9,7 +9,7 @@ public class Post
     public DateTime CreatedAt { get; set; }
     
     public long ChannelId { get; set; }
-    public Channel Channel { get; set; }
+    public Channel Channel { get; set; } = null!;
     
     public ICollection<Comment> Comments { get; set; }
     //public List<int> Reactions { get; set; }
