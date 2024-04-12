@@ -3,4 +3,6 @@
 public interface IParsingService
 {
     Task ParseChannelsDataAsync();
+
+    Task UpdateChannelsDataAsync();
 }

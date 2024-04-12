@@ -22,4 +22,16 @@ public class ParsingService : BaseService, IParsingService
 
         await _context.SaveChangesAsync();
     }
+
+    public async Task UpdateChannelsDataAsync()
+    {
+        Console.WriteLine("Updating channels data");
+        
+        _context.Channels.Add(new Channel
+        {
+            Name = "Updated channel data"
+        });
+
+        await _context.SaveChangesAsync();
+    }
 }

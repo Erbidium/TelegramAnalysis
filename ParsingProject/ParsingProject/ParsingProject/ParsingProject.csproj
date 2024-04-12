@@ -20,7 +20,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="DTO" />
       <Folder Include="Middlewares" />
       <Folder Include="Validators" />
     </ItemGroup>

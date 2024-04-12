@@ -1,5 +1,6 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using ParsingProject;
 using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.MappingProfiles;
 using ParsingProject.BLL.Services;
@@ -13,6 +14,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IParsingService, ParsingService>();
+builder.Services.AddSingleton<ParsingUpdateHostedService>();
+builder.Services.AddHostedService(
+    provider => provider.GetRequiredService<ParsingUpdateHostedService>());
 
 builder.Services.AddDbContext<ParsingProjectContext>(options =>
 {
