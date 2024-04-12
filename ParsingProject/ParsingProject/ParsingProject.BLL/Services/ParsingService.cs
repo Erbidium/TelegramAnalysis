@@ -2,6 +2,7 @@
 using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
+using ParsingProject.DAL.Entities;
 
 namespace ParsingProject.BLL.Services;
 
@@ -11,8 +12,14 @@ public class ParsingService : BaseService, IParsingService
     {
     }
 
-    public void ParseChannelsData()
+    public async Task ParseChannelsDataAsync()
     {
         Console.WriteLine("Parsing data");
+        _context.Channels.Add(new Channel
+        {
+            Name = "Hello, test channel"
+        });
+
+        await _context.SaveChangesAsync();
     }
 }

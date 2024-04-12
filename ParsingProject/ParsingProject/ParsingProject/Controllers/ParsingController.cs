@@ -18,10 +18,9 @@ public class ParsingController : ControllerBase
     }
 
     [HttpGet(Name = "ParseChannels")]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
-        // clear DB
-        _parsingService.ParseChannelsData();
+        await _parsingService.ParseChannelsDataAsync();
 
         return Ok();
     }

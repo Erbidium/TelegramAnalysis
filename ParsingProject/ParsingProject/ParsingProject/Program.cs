@@ -25,8 +25,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(TestProfile)));
 
-// builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MyProfile)), Assembly.GetAssembly(typeof(MyProfile)));
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

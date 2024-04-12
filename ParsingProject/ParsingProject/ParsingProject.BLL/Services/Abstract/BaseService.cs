@@ -5,8 +5,8 @@ namespace ParsingProject.BLL.Services.Abstract;
 
 public abstract class BaseService
 {
-    private readonly ParsingProjectContext _context;
-    private readonly IMapper _mapper;
+    protected readonly ParsingProjectContext _context;
+    protected readonly IMapper _mapper;
 
     public BaseService(ParsingProjectContext context, IMapper mapper)
     {

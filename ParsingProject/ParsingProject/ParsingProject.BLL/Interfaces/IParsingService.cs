@@ -2,5 +2,5 @@
 
 public interface IParsingService
 {
-    void ParseChannelsData();
+    Task ParseChannelsDataAsync();
 }
