@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Interfaces;
+using ParsingProject.BLL.MappingProfiles;
 using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;
 using ParsingProject.Extensions;
@@ -21,6 +22,8 @@ builder.Services.AddDbContext<ParsingProjectContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(TestProfile)));
 
 // builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(MyProfile)), Assembly.GetAssembly(typeof(MyProfile)));
 

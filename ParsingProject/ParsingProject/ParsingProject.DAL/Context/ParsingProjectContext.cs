@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using ParsingProject.DAL.Entities;
 
 namespace ParsingProject.DAL.Context;
@@ -29,5 +31,19 @@ public class ParsingProjectContext : DbContext
             .HasMany(p => p.Comments)
             .WithOne(c => c.Post)
             .HasForeignKey(c => c.PostId);
+    }
+}
+
+public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ParsingProjectContext>
+{
+    public ParsingProjectContext CreateDbContext(string[] args)
+    {
+        IConfigurationRoot configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile(@Directory.GetCurrentDirectory() + "/../ParsingProject/appsettings.json")
+            .Build();
+        var builder = new DbContextOptionsBuilder<ParsingProjectContext>();
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        builder.UseSqlServer(connectionString);
+        return new ParsingProjectContext(builder.Options);
     }
 }

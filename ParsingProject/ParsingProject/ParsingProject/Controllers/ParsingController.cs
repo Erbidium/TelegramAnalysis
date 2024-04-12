@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ParsingProject.BLL.Interfaces;
 
 namespace ParsingProject.Controllers;
 
@@ -8,8 +9,11 @@ public class ParsingController : ControllerBase
 {
     private readonly ILogger<ParsingController> _logger;
 
-    public ParsingController(ILogger<ParsingController> logger)
+    private readonly IParsingService _parsingService;
+
+    public ParsingController(IParsingService parsingService, ILogger<ParsingController> logger)
     {
+        _parsingService = parsingService;
         _logger = logger;
     }
 
@@ -17,7 +21,7 @@ public class ParsingController : ControllerBase
     public IActionResult Get()
     {
         // clear DB
-        // call parsing service
+        _parsingService.ParseChannelsData();
 
         return Ok();
     }
