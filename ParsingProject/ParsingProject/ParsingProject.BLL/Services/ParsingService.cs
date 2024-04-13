@@ -21,6 +21,9 @@ public class ParsingService : BaseService, IParsingService
         });
 
         await _context.SaveChangesAsync();
+
+        var dataParser = new DataParser();
+        await dataParser.ParseData();
     }
 
     public async Task UpdateChannelsDataAsync()
