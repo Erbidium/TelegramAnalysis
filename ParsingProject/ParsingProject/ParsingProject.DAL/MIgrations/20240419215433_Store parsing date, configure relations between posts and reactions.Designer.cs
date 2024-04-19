@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ParsingProject.DAL.Context;
 
@@ -11,9 +12,11 @@ using ParsingProject.DAL.Context;
 namespace ParsingProject.DAL.Migrations
 {
     [DbContext(typeof(ParsingProjectContext))]
-    partial class ParsingProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20240419215433_Store parsing date, configure relations between posts and reactions")]
+    partial class Storeparsingdateconfigurerelationsbetweenpostsandreactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -83,38 +86,6 @@ namespace ParsingProject.DAL.Migrations
                     b.HasIndex("PostId");
 
                     b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("ParsingProject.DAL.Entities.CommentReaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("CommentId")
-                        .HasColumnType("bigint");
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Emoticon")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("ParsedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Reaction")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CommentId");
-
-                    b.ToTable("CommentReactions");
                 });
 
             modelBuilder.Entity("ParsingProject.DAL.Entities.Post", b =>
@@ -197,17 +168,6 @@ namespace ParsingProject.DAL.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("ParsingProject.DAL.Entities.CommentReaction", b =>
-                {
-                    b.HasOne("ParsingProject.DAL.Entities.Comment", "Comment")
-                        .WithMany("Reactions")
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Comment");
-                });
-
             modelBuilder.Entity("ParsingProject.DAL.Entities.Post", b =>
                 {
                     b.HasOne("ParsingProject.DAL.Entities.Channel", "Channel")
@@ -233,11 +193,6 @@ namespace ParsingProject.DAL.Migrations
             modelBuilder.Entity("ParsingProject.DAL.Entities.Channel", b =>
                 {
                     b.Navigation("Posts");
-                });
-
-            modelBuilder.Entity("ParsingProject.DAL.Entities.Comment", b =>
-                {
-                    b.Navigation("Reactions");
                 });
 
             modelBuilder.Entity("ParsingProject.DAL.Entities.Post", b =>

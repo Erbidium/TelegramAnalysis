@@ -1,10 +1,10 @@
 ﻿namespace ParsingProject.DAL.Entities;
 
-public class PostReaction
+public class CommentReaction
 {
     public long Id { get; set; }
     
-    public long PostId { get; set; }
+    public long CommentId { get; set; }
 
     public string Emoticon { get; set; } = string.Empty;
 
@@ -14,5 +14,5 @@ public class PostReaction
     
     public int Count { get; set; }
     
-    public Post Post { get; set; } = null!;
+    public Comment Comment { get; set; } = null!;
 }

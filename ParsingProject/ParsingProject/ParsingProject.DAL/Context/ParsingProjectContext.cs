@@ -9,15 +9,17 @@ public class ParsingProjectContext : DbContext
 {
     public DbSet<Channel> Channels { get; private set; }
     public DbSet<Post> Posts { get; private set; }
-    public DbSet<Comment> Comments { get; private set; }
     public DbSet<PostReaction> PostReactions { get; private set; }
-    
+    public DbSet<Comment> Comments { get; private set; }
+    public DbSet<CommentReaction> CommentReactions { get; private set; }
+
     public ParsingProjectContext(DbContextOptions<ParsingProjectContext> options) : base(options)
     {
         Channels = Set<Channel>();
         Posts = Set<Post>();
-        Comments = Set<Comment>();
         PostReactions = Set<PostReaction>();
+        Comments = Set<Comment>();
+        CommentReactions = Set<CommentReaction>();
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -33,6 +35,18 @@ public class ParsingProjectContext : DbContext
             .HasMany(p => p.Comments)
             .WithOne(c => c.Post)
             .HasForeignKey(c => c.PostId);
+
+        builder
+            .Entity<Post>()
+            .HasMany(p => p.Reactions)
+            .WithOne(r => r.Post)
+            .HasForeignKey(r => r.PostId);
+        
+        builder
+            .Entity<Comment>()
+            .HasMany(c => c.Reactions)
+            .WithOne(r => r.Comment)
+            .HasForeignKey(r => r.CommentId);
     }
 }
 

@@ -12,9 +12,12 @@ public class Post
     
     public DateTime EditDate { get; set; }
     
+    public DateTime ParsedAt { get; set; }
+    
     public long ChannelId { get; set; }
     public Channel Channel { get; set; } = null!;
     
     public ICollection<Comment> Comments { get; set; }
-    //public List<int> Reactions { get; set; }
+    
+    public ICollection<PostReaction> Reactions { get; set; }
 }

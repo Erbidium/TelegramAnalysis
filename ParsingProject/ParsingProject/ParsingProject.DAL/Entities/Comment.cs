@@ -12,6 +12,9 @@ public class Comment
     
     public DateTime EditDate { get; set; }
     
+    public DateTime ParsedAt { get; set; }
     public long PostId { get; set; }
     public Post Post { get; set; } = null!;
+    
+    public ICollection<CommentReaction> Reactions { get; set; }
 }

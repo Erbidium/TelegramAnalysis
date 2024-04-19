@@ -10,8 +10,7 @@ namespace ParsingProject;
 public class ParsingService : BaseService, IParsingService
 {
     public ParsingService(ParsingProjectContext context, IMapper mapper) : base(context, mapper)
-    {
-    }
+    { }
 
     public async Task ParseChannelsDataAsync(WTelegramService wt)
     {
@@ -50,7 +49,19 @@ public class ParsingService : BaseService, IParsingService
                         if (reply is not Message replyMessage)
                             continue;
 
-                        await SaveCommentAsync(replyMessage, postId);
+                        var commentId = await SaveCommentAsync(replyMessage, postId);
+                        
+                        foreach (var reactionCount in replyMessage.reactions.results)
+                        {
+                            _context.CommentReactions.Add(new CommentReaction
+                            {
+                                CommentId = commentId,
+                                Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                                Reaction = ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                                Count = reactionCount.count,
+                                ParsedAt = DateTime.Now
+                            });
+                        }
                     }
                 }
 
@@ -61,7 +72,8 @@ public class ParsingService : BaseService, IParsingService
                         PostId = postId,
                         Emoticon = (reactionCount.reaction as dynamic).emoticon,
                         Reaction = ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                        Count = reactionCount.count
+                        Count = reactionCount.count,
+                        ParsedAt = DateTime.Now
                     });
                 }
 
@@ -177,6 +189,7 @@ public class ParsingService : BaseService, IParsingService
             ViewsCount = post.views,
             Date = post.Date,
             EditDate = post.edit_date,
+            ParsedAt = DateTime.Now,
             ChannelId = channelId
         };
 
@@ -186,7 +199,7 @@ public class ParsingService : BaseService, IParsingService
         return postDbModel.Id;
     }
     
-    private async Task SaveCommentAsync(Message comment, long messageId)
+    private async Task<long> SaveCommentAsync(Message comment, long messageId)
     {
         var commentDbModel = new Comment
         {
@@ -195,11 +208,14 @@ public class ParsingService : BaseService, IParsingService
             ViewsCount = comment.views,
             Date = comment.Date,
             EditDate = comment.edit_date,
-            PostId = messageId
+            PostId = messageId,
+            ParsedAt = DateTime.Now
         };
 
         _context.Comments.Add(commentDbModel);
         await _context.SaveChangesAsync();
+
+        return commentDbModel.Id;
     }
 
     public async Task UpdateChannelsDataAsync()
