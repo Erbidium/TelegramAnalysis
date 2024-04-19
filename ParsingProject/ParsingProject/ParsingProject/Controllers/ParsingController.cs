@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using ParsingProject.BLL.Interfaces;
 using ParsingProject.DTO;
 
 namespace ParsingProject.Controllers;
@@ -8,6 +7,8 @@ namespace ParsingProject.Controllers;
 [Route("[controller]")]
 public class ParsingController : ControllerBase
 {
+    private readonly WTelegramService WT;
+    
     private readonly ILogger<ParsingController> _logger;
 
     private readonly IParsingService _parsingService;
@@ -16,17 +17,19 @@ public class ParsingController : ControllerBase
     public ParsingController(
         IParsingService parsingService,
         ParsingUpdateHostedService parsingUpdateHostedService,
-        ILogger<ParsingController> logger)
+        ILogger<ParsingController> logger,
+        WTelegramService wt)
     {
         _parsingService = parsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
         _logger = logger;
+        WT = wt;
     }
 
     [HttpGet(Name = "ParseChannels")]
     public async Task<IActionResult> Get()
     {
-        await _parsingService.ParseChannelsDataAsync();
+        await _parsingService.ParseChannelsDataAsync(WT);
 
         return Ok();
     }

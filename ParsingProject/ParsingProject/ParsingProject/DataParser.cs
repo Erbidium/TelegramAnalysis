@@ -1,25 +1,14 @@
-﻿using System.Text;
-using TL;
+﻿using ParsingProject.DAL.Context;
+using ParsingProject.DAL.Entities;
 
-namespace ParsingProject.BLL.Services;
+namespace ParsingProject;
 
 public class DataParser
 {
-    private static string Config(string what)
+    public async Task ParseData(WTelegramService wt, ParsingProjectContext dbContext)
     {
-        switch (what)
-        {
-            case "api_id": return "";
-            case "api_hash": return "";
-            case "phone_number": return "";
-            case "verification_code": Console.Write("Code: "); return "";
-            default: return null;                  // let WTelegramClient decide the default config
-        }
-    }
-
-    public async Task ParseData()
-    {
-        using var client = new WTelegram.Client(Config);
+        var client = wt.Client;
+        
         var myself = await client.LoginUserIfNeeded();
         Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
@@ -30,7 +19,21 @@ public class DataParser
             if (chat.IsActive)
                 Console.WriteLine($"{id,10}: {chat}");
             
-            var allMessages = await client.Messages_GetHistory(chat);
+            if (!chat.IsChannel)
+                continue;
+
+            var channelDbModel = new Channel
+            {
+                MainUsername = chat.MainUsername,
+                Title = chat.Title,
+                TelegramId = chat.ID,
+                
+            };
+
+            dbContext.Channels.Add(channelDbModel);
+            await dbContext.SaveChangesAsync();
+
+            /*var allMessages = await client.Messages_GetHistory(chat);
 
             Console.OutputEncoding = Encoding.UTF8;
             
@@ -58,7 +61,7 @@ public class DataParser
                 {
                     Console.WriteLine(reply);
                 }
-            }
+            }*/
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using ParsingProject.BLL.Interfaces;
-
-namespace ParsingProject;
+﻿namespace ParsingProject;
 
 public class ParsingUpdateHostedService : BackgroundService
 {

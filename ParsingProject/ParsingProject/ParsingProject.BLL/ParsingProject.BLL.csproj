@@ -15,4 +15,8 @@
       <PackageReference Include="WTelegramClient" Version="4.0.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Interfaces" />
+    </ItemGroup>
+
 </Project>

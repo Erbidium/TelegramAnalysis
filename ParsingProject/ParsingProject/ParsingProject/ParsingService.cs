@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
-using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
 using ParsingProject.DAL.Entities;
 
-namespace ParsingProject.BLL.Services;
+namespace ParsingProject;
 
 public class ParsingService : BaseService, IParsingService
 {
@@ -12,18 +11,10 @@ public class ParsingService : BaseService, IParsingService
     {
     }
 
-    public async Task ParseChannelsDataAsync()
+    public async Task ParseChannelsDataAsync(WTelegramService wt)
     {
-        Console.WriteLine("Parsing data");
-        _context.Channels.Add(new Channel
-        {
-            Name = "Hello, test channel"
-        });
-
-        await _context.SaveChangesAsync();
-
         var dataParser = new DataParser();
-        await dataParser.ParseData();
+        await dataParser.ParseData(wt, _context);
     }
 
     public async Task UpdateChannelsDataAsync()
@@ -32,7 +23,8 @@ public class ParsingService : BaseService, IParsingService
         
         _context.Channels.Add(new Channel
         {
-            Name = "Updated channel data"
+            MainUsername = "TestUser",
+            Title = "Updated channel data"
         });
 
         await _context.SaveChangesAsync();
