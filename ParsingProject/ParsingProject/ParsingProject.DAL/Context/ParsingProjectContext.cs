@@ -10,12 +10,14 @@ public class ParsingProjectContext : DbContext
     public DbSet<Channel> Channels { get; private set; }
     public DbSet<Post> Posts { get; private set; }
     public DbSet<Comment> Comments { get; private set; }
+    public DbSet<PostReaction> PostReactions { get; private set; }
     
     public ParsingProjectContext(DbContextOptions<ParsingProjectContext> options) : base(options)
     {
         Channels = Set<Channel>();
         Posts = Set<Post>();
         Comments = Set<Comment>();
+        PostReactions = Set<PostReaction>();
     }
 
     protected override void OnModelCreating(ModelBuilder builder)

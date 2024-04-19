@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ParsingProject.DAL.Context;
 
@@ -11,9 +12,11 @@ using ParsingProject.DAL.Context;
 namespace ParsingProject.DAL.Migrations
 {
     [DbContext(typeof(ParsingProjectContext))]
-    partial class ParsingProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20240419171820_Config comment db")]
+    partial class Configcommentdb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -114,29 +117,6 @@ namespace ParsingProject.DAL.Migrations
                     b.HasIndex("ChannelId");
 
                     b.ToTable("Posts");
-                });
-
-            modelBuilder.Entity("ParsingProject.DAL.Entities.PostReaction", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<int>("Count")
-                        .HasColumnType("int");
-
-                    b.Property<long>("PostId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Reaction")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PostReactions");
                 });
 
             modelBuilder.Entity("ParsingProject.DAL.Entities.Comment", b =>

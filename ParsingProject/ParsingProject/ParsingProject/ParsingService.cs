@@ -39,27 +39,117 @@ public class ParsingService : BaseService, IParsingService
                 if (m is not Message message)
                     continue;
                 
-                await SavePostAsync(message, channelId);
+                var postId = await SavePostAsync(message, channelId);
 
-                /*var reactions = await client.Messages_GetMessagesReactions(chat, m.ID);
-                var allReactions = (reactions.UpdateList[0] as UpdateMessageReactions)!.reactions;
-                
-                foreach (var reactionCount in allReactions.results)
+                if (message.replies is not null)
                 {
-                    Console.WriteLine($"{(reactionCount.reaction as dynamic).emoticon}: {reactionCount.count}");
+                    var replies = await client.Messages_GetReplies(chat, m.ID);
+
+                    foreach (var reply in replies.Messages)
+                    {
+                        if (reply is not Message replyMessage)
+                            continue;
+
+                        await SaveCommentAsync(replyMessage, postId);
+                    }
                 }
 
-                var result = await client.Messages_GetDiscussionMessage(chat, m.ID);
-
-                var replies = await client.Messages_GetReplies(chat, m.ID);
-
-                foreach (var reply in replies.Messages)
+                foreach (var reactionCount in message.reactions.results)
                 {
-                    Console.WriteLine(reply);
+                    _context.PostReactions.Add(new PostReaction
+                    {
+                        PostId = postId,
+                        Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                        Reaction = ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                        Count = reactionCount.count
+                    });
                 }
-                */
+
+                await _context.SaveChangesAsync();
             }
         }
+    }
+
+    private static string ReactionsMap(string reaction)
+    {
+        return reaction switch
+        {
+            "👍" => "thumbs up",
+            "👎" => "thumbs down",
+            "❤" => "red heart",
+            "🔥" => "fire",
+            "🥰" => "smiling face",
+            "👏" => "clapping hands",
+            "😁" => "grinning face",
+            "🤔" => "thinking face",
+            "🤯" => "exploding head",
+            "😱" => "scream",
+            "🤬" => "face with symbols",
+            "😢" => "crying face",
+            "🎉" => "party popper",
+            "🤩" => "star-struck",
+            "🤮" => "face vomiting",
+            "💩" => "pile of poo",
+            "🙏" => "folded hands",
+            "👌" => "ok hand",
+            "🕊" => "dove of peace",
+            "🤡" => "clown face",
+            "🥱" => "yawning face",
+            "🥴" => "woozy face",
+            "😍" => "smiling face with heart-shaped eyes",
+            "🐳" => "spouting whale",
+            "❤‍🔥" => "heart on fire",
+            "🌚" => "new moon face",
+            "🌭" => "hot dog",
+            "💯" => "hundred points",
+            "🤣" => "rolling on the floor laughing",
+            "⚡" => "high voltage",
+            "🍌" => "banana",
+            "🏆" => "trophy",
+            "💔" => "broken heart",
+            "🤨" => "face with raised eyebrow",
+            "😐" => "neutral face",
+            "🍓" => "",
+            "🍾" => "",
+            "💋" => "",
+            "🖕" => "",
+            "😈" => "",
+            "😴" => "",
+            "😭" => "",
+            "🤓" => "",
+            "👻" => "",
+            "👨‍💻" => "",
+            "👀" => "",
+            "🎃" => "",
+            "🙈" => "",
+            "😇" => "",
+            "😨" => "",
+            "🤝" => "",
+            "✍" => "",
+            "🤗" => "",
+            "🫡" => "",
+            "🎅" => "",
+            "🎄" => "",
+            "☃" => "",
+            "💅" => "",
+            "🤪" => "",
+            "🗿" => "",
+            "🆒" => "",
+            "💘" => "",
+            "🙉" => "",
+            "🦄" => "",
+            "😘" => "",
+            "💊" => "",
+            "🙊" => "",
+            "😎" => "",
+            "👾" => "",
+            "🤷‍♂" => "",
+            "🤷" => "",
+            "🤷‍♀" => "",
+            "😡" => "",
+            _ => "other"
+                
+        };
     }
 
     private async Task<long> SaveChannelAsync(TL.Channel chat)
@@ -78,7 +168,7 @@ public class ParsingService : BaseService, IParsingService
         return channelDbModel.Id;
     }
     
-    private async Task SavePostAsync(Message post, long channelId)
+    private async Task<long> SavePostAsync(Message post, long channelId)
     {
         var postDbModel = new Post
         {
@@ -91,6 +181,24 @@ public class ParsingService : BaseService, IParsingService
         };
 
         _context.Posts.Add(postDbModel);
+        await _context.SaveChangesAsync();
+
+        return postDbModel.Id;
+    }
+    
+    private async Task SaveCommentAsync(Message comment, long messageId)
+    {
+        var commentDbModel = new Comment
+        {
+            TelegramId = comment.ID,
+            Text = comment.message,
+            ViewsCount = comment.views,
+            Date = comment.Date,
+            EditDate = comment.edit_date,
+            PostId = messageId
+        };
+
+        _context.Comments.Add(commentDbModel);
         await _context.SaveChangesAsync();
     }
 
