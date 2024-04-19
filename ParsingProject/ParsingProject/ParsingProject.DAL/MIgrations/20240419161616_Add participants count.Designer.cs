@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ParsingProject.DAL.Context;
 
@@ -11,9 +12,11 @@ using ParsingProject.DAL.Context;
 namespace ParsingProject.DAL.Migrations
 {
     [DbContext(typeof(ParsingProjectContext))]
-    partial class ParsingProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20240419161616_Add participants count")]
+    partial class Addparticipantscount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,14 +87,8 @@ namespace ParsingProject.DAL.Migrations
                     b.Property<long>("ChannelId")
                         .HasColumnType("bigint");
 
-                    b.Property<DateTime>("Date")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("EditDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<long>("TelegramId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Text")
                         .IsRequired()

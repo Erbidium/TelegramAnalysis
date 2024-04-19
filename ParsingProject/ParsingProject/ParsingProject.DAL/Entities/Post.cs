@@ -3,10 +3,14 @@
 public class Post
 {
     public long Id { get; set; }
+    
+    public long TelegramId { get; set; }
     public string Text { get; set; } = string.Empty;
     public int ViewsCount { get; set; }
     
-    public DateTime CreatedAt { get; set; }
+    public DateTime Date { get; set; }
+    
+    public DateTime EditDate { get; set; }
     
     public long ChannelId { get; set; }
     public Channel Channel { get; set; } = null!;

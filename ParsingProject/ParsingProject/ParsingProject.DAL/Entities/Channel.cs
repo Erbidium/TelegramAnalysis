@@ -6,6 +6,8 @@ public class Channel
     
     public long TelegramId { get; set; }
     
+    public int ParticipantsCount { get; set; }
+    
     public string? MainUsername { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     
