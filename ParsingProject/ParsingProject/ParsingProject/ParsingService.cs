@@ -108,19 +108,44 @@ public class ParsingService : BaseService, IParsingService
             }
         }
 
-        foreach (var reactionCount in message.reactions.results)
+        if (message.reactions is not null)
         {
-            _context.PostReactions.Add(new PostReaction
+            foreach (var reactionCount in message.reactions.results)
             {
-                PostId = postId,
-                Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                Count = reactionCount.count,
-                ParsedAt = DateTime.Now
-            });
+                _context.PostReactions.Add(new PostReaction
+                {
+                    PostId = postId,
+                    Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                    Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                    Count = reactionCount.count,
+                    ParsedAt = DateTime.Now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+        }
+    }
+    
+    private async Task SaveCommentDataAsync(Message replyMessage, long postId)
+    {
+        var commentId = await SaveCommentAsync(replyMessage, postId);
+
+        if (replyMessage.reactions is not null)
+        {
+            foreach (var reactionCount in replyMessage.reactions.results)
+            {
+                _context.CommentReactions.Add(new CommentReaction
+                {
+                    CommentId = commentId,
+                    Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                    Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                    Count = reactionCount.count,
+                    ParsedAt = DateTime.Now
+                });
+            }
         }
 
-        await _context.SaveChangesAsync();    
+        await _context.SaveChangesAsync();
     }
 
     private async Task UpdateChannelDataAsync(TL.Channel channel, Client client)
@@ -155,6 +180,84 @@ public class ParsingService : BaseService, IParsingService
                 storedMessage.Text != message.message)
             {
                 await SavePostAsync(message, storedChannel.Id);
+            }
+            
+            if (message.replies is not null)
+            {
+                var replies = await client.Messages_GetReplies(channel, message.ID);
+
+                foreach (var reply in replies.Messages)
+                {
+                    if (reply is not Message replyMessage)
+                        continue;
+                    
+                    var storedReply = await _context.Comments
+                        .Where(c => c.TelegramId == replyMessage.ID)
+                        .OrderByDescending(p => p.ParsedAt)
+                        .FirstOrDefaultAsync();
+                    
+                    if (storedReply is null ||
+                        (storedReply.Hash != replyMessage.message.GetHashCode() || 
+                         storedReply.Text != replyMessage.message))
+                    {
+                        await SaveCommentDataAsync(replyMessage, storedMessage.Id);
+                        continue;
+                    }
+
+                    if (replyMessage.reactions is not null)
+                    {
+                        foreach (var reactionCount in replyMessage.reactions.results)
+                        {
+                            string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+                            
+                            var storedReaction = await _context.CommentReactions.Where(r => r.CommentId == storedReply.Id &&
+                                                        r.Reaction == reaction)
+                                                    .OrderByDescending(r => r.ParsedAt)
+                                                    .FirstOrDefaultAsync();
+
+                            if (storedReaction == null || storedReaction.Count != reactionCount.count)
+                            {
+                                _context.CommentReactions.Add(new CommentReaction
+                                {
+                                    CommentId = storedReply.Id,
+                                    Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                                    Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                                    Count = reactionCount.count,
+                                    ParsedAt = DateTime.Now
+                                });
+                            }
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            if (message.reactions is not null)
+            {
+                foreach (var reactionCount in message.reactions.results)
+                {
+                    string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+
+                    var storedReaction = await _context.PostReactions.Where(r => r.PostId == storedMessage.Id &&
+                            r.Reaction == reaction)
+                        .OrderByDescending(r => r.ParsedAt)
+                        .FirstOrDefaultAsync();
+
+                    if (storedReaction == null || storedReaction.Count != reactionCount.count)
+                    {
+                        _context.PostReactions.Add(new PostReaction
+                        {
+                            PostId = storedMessage.Id,
+                            Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                            Count = reactionCount.count,
+                            ParsedAt = DateTime.Now
+                        });
+                    }
+                }
+
+                await _context.SaveChangesAsync();
             }
         }
     }
@@ -201,6 +304,7 @@ public class ParsingService : BaseService, IParsingService
         {
             TelegramId = comment.ID,
             Text = comment.message,
+            Hash = comment.message.GetHashCode(),
             ViewsCount = comment.views,
             Date = comment.Date,
             EditDate = comment.edit_date,
