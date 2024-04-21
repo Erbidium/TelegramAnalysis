@@ -4,5 +4,5 @@ public interface IParsingService
 {
     Task ParseChannelsDataAsync(WTelegramService wt);
 
-    Task UpdateChannelsDataAsync();
+    Task UpdateChannelsDataAsync(WTelegramService wt);
 }

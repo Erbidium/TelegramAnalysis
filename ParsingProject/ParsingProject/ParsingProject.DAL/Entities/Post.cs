@@ -6,6 +6,8 @@ public class Post
     
     public long TelegramId { get; set; }
     public string Text { get; set; } = string.Empty;
+
+    public int Hash { get; set; }
     public int ViewsCount { get; set; }
     
     public DateTime Date { get; set; }

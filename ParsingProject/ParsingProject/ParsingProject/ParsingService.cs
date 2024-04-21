@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using ParsingProject.BLL.Services;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
 using ParsingProject.DAL.Entities;
 using TL;
+using WTelegram;
 using Channel = ParsingProject.DAL.Entities.Channel;
 
 namespace ParsingProject;
@@ -16,6 +19,8 @@ public class ParsingService : BaseService, IParsingService
     {
         var client = wt.Client;
         
+        //if (wt.User == null) throw new Exception("Complete the login first");
+        
         var myself = await client.LoginUserIfNeeded();
         Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
@@ -28,140 +33,130 @@ public class ParsingService : BaseService, IParsingService
 
             if (chat is not TL.Channel channel)
                 continue;
-            
-            var channelId = await SaveChannelAsync(channel);
 
-            var allMessages = await client.Messages_GetHistory(channel);
+            await SaveChannelDataAsync(channel, client);
+        }
+    }
+    
+    public async Task UpdateChannelsDataAsync(WTelegramService wt)
+    {
+        Console.WriteLine("Updating channels data");
+        
+        var client = wt.Client;
+        
+        //if (wt.User == null) throw new Exception("Complete the login first");
+        
+        var myself = await client.LoginUserIfNeeded();
+        Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
-            foreach (var m in allMessages.Messages)
+        var chats = await client.Messages_GetAllChats();
+
+        foreach (var (_, chat) in chats.chats)
+        {
+            if (!chat.IsChannel || !chat.IsActive)
+                continue;
+
+            if (chat is not TL.Channel channel)
+                continue;
+
+            await UpdateChannelDataAsync(channel, client);
+        }
+    }
+
+    private async Task SaveChannelDataAsync(TL.Channel channel, Client client)
+    {
+        var channelId = await SaveChannelAsync(channel);
+        var allMessages = await client.Messages_GetHistory(channel);
+
+        foreach (var m in allMessages.Messages)
+        {
+            if (m is not Message message)
+                continue;
+
+            await SavePostDataAsync(message, channel, channelId, client);
+        }
+    }
+
+    private async Task SavePostDataAsync(Message message, TL.Channel channel, long channelId, Client client)
+    {
+        var postId = await SavePostAsync(message, channelId);
+
+        if (message.replies is not null)
+        {
+            var replies = await client.Messages_GetReplies(channel, message.ID);
+
+            foreach (var reply in replies.Messages)
             {
-                if (m is not Message message)
+                if (reply is not Message replyMessage)
                     continue;
-                
-                var postId = await SavePostAsync(message, channelId);
 
-                if (message.replies is not null)
+                var commentId = await SaveCommentAsync(replyMessage, postId);
+                    
+                foreach (var reactionCount in replyMessage.reactions.results)
                 {
-                    var replies = await client.Messages_GetReplies(chat, m.ID);
-
-                    foreach (var reply in replies.Messages)
+                    _context.CommentReactions.Add(new CommentReaction
                     {
-                        if (reply is not Message replyMessage)
-                            continue;
-
-                        var commentId = await SaveCommentAsync(replyMessage, postId);
-                        
-                        foreach (var reactionCount in replyMessage.reactions.results)
-                        {
-                            _context.CommentReactions.Add(new CommentReaction
-                            {
-                                CommentId = commentId,
-                                Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                                Reaction = ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                                Count = reactionCount.count,
-                                ParsedAt = DateTime.Now
-                            });
-                        }
-                    }
-                }
-
-                foreach (var reactionCount in message.reactions.results)
-                {
-                    _context.PostReactions.Add(new PostReaction
-                    {
-                        PostId = postId,
+                        CommentId = commentId,
                         Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                        Reaction = ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                        Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
                         Count = reactionCount.count,
                         ParsedAt = DateTime.Now
                     });
                 }
-
+                
                 await _context.SaveChangesAsync();
             }
         }
+
+        foreach (var reactionCount in message.reactions.results)
+        {
+            _context.PostReactions.Add(new PostReaction
+            {
+                PostId = postId,
+                Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                Count = reactionCount.count,
+                ParsedAt = DateTime.Now
+            });
+        }
+
+        await _context.SaveChangesAsync();    
     }
 
-    private static string ReactionsMap(string reaction)
+    private async Task UpdateChannelDataAsync(TL.Channel channel, Client client)
     {
-        return reaction switch
+        var storedChannel = await _context.Channels.FirstOrDefaultAsync(c => c.TelegramId == channel.ID);
+
+        if (storedChannel is null)
         {
-            "👍" => "thumbs up",
-            "👎" => "thumbs down",
-            "❤" => "red heart",
-            "🔥" => "fire",
-            "🥰" => "smiling face",
-            "👏" => "clapping hands",
-            "😁" => "grinning face",
-            "🤔" => "thinking face",
-            "🤯" => "exploding head",
-            "😱" => "scream",
-            "🤬" => "face with symbols",
-            "😢" => "crying face",
-            "🎉" => "party popper",
-            "🤩" => "star-struck",
-            "🤮" => "face vomiting",
-            "💩" => "pile of poo",
-            "🙏" => "folded hands",
-            "👌" => "ok hand",
-            "🕊" => "dove of peace",
-            "🤡" => "clown face",
-            "🥱" => "yawning face",
-            "🥴" => "woozy face",
-            "😍" => "smiling face with heart-shaped eyes",
-            "🐳" => "spouting whale",
-            "❤‍🔥" => "heart on fire",
-            "🌚" => "new moon face",
-            "🌭" => "hot dog",
-            "💯" => "hundred points",
-            "🤣" => "rolling on the floor laughing",
-            "⚡" => "high voltage",
-            "🍌" => "banana",
-            "🏆" => "trophy",
-            "💔" => "broken heart",
-            "🤨" => "face with raised eyebrow",
-            "😐" => "neutral face",
-            "🍓" => "strawberry",
-            "🍾" => "bottle with popping cork",
-            "💋" => "kiss mark",
-            "🖕" => "middle finger",
-            "😈" => "smiling face with horns",
-            "😴" => "sleeping face",
-            "😭" => "loudly crying face",
-            "🤓" => "nerd face",
-            "👻" => "ghost",
-            "👨‍💻" => "man technologist",
-            "👀" => "eyes",
-            "🎃" => "jack-o-lantern",
-            "🙈" => "see-no-evil",
-            "😇" => "smiling face with halo",
-            "😨" => "fearful face",
-            "🤝" => "",
-            "✍" => "",
-            "🤗" => "",
-            "🫡" => "",
-            "🎅" => "",
-            "🎄" => "",
-            "☃" => "",
-            "💅" => "",
-            "🤪" => "",
-            "🗿" => "",
-            "🆒" => "",
-            "💘" => "",
-            "🙉" => "",
-            "🦄" => "",
-            "😘" => "",
-            "💊" => "",
-            "🙊" => "",
-            "😎" => "",
-            "👾" => "",
-            "🤷‍♂" => "man shrugging",
-            "🤷" => "peson shrugging",
-            "🤷‍♀" => "woman shrugging",
-            "😡" => "enraged face",
-            _ => "other"
-                
-        };
+            await SaveChannelDataAsync(channel, client);
+            return;
+        }
+        
+        var allMessages = await client.Messages_GetHistory(channel);
+
+        foreach (var m in allMessages.Messages)
+        {
+            if (m is not Message message)
+                continue;
+            
+            var storedMessage = await _context.Posts
+                .Where(p => p.TelegramId == message.ID)
+                .OrderByDescending(p => p.ParsedAt)
+                .FirstOrDefaultAsync();
+
+            if (storedMessage is null)
+            {
+                await SavePostDataAsync(message, channel, storedChannel.Id, client);
+                continue;
+            }
+
+            if (storedMessage.Hash != message.message.GetHashCode() ||
+                storedMessage.Text != message.message)
+            {
+                await SavePostAsync(message, storedChannel.Id);
+            }
+        }
     }
 
     private async Task<long> SaveChannelAsync(TL.Channel chat)
@@ -186,6 +181,7 @@ public class ParsingService : BaseService, IParsingService
         {
             TelegramId = post.ID,
             Text = post.message,
+            Hash = post.message.GetHashCode(),
             ViewsCount = post.views,
             Date = post.Date,
             EditDate = post.edit_date,
@@ -216,18 +212,5 @@ public class ParsingService : BaseService, IParsingService
         await _context.SaveChangesAsync();
 
         return commentDbModel.Id;
-    }
-
-    public async Task UpdateChannelsDataAsync()
-    {
-        Console.WriteLine("Updating channels data");
-        
-        _context.Channels.Add(new Channel
-        {
-            MainUsername = "TestUser",
-            Title = "Updated channel data"
-        });
-
-        await _context.SaveChangesAsync();
     }
 }

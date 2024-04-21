@@ -6,14 +6,18 @@ public class ParsingUpdateHostedService : BackgroundService
     private readonly IServiceScopeFactory _factory;
     private readonly TimeSpan _period = TimeSpan.FromSeconds(5); //.FromHours(1);
     private int _executionCount;
+
+    private WTelegramService _wt;
     public bool IsEnabled { get; set; } = true;
     
     public ParsingUpdateHostedService(
         ILogger<ParsingUpdateHostedService> logger,
-        IServiceScopeFactory factory)
+        IServiceScopeFactory factory,
+        WTelegramService wt)
     {
         _logger = logger;
         _factory = factory;
+        _wt = wt;
     }
     
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -29,7 +33,7 @@ public class ParsingUpdateHostedService : BackgroundService
                 {
                     await using AsyncServiceScope asyncScope = _factory.CreateAsyncScope();
                     var parsingService = asyncScope.ServiceProvider.GetRequiredService<IParsingService>();
-                    await parsingService.UpdateChannelsDataAsync();
+                    await parsingService.UpdateChannelsDataAsync(_wt);
                     
                     _executionCount++;
                     _logger.LogInformation(
