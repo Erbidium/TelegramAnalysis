@@ -33,6 +33,11 @@ public class ParsingService : BaseService, IParsingService
 
             if (chat is not TL.Channel channel)
                 continue;
+            
+            // Random delay
+            Random random = new Random();
+            var mseconds = random.Next(3, 10) * 1000;   
+            Thread.Sleep(mseconds);
 
             await SaveChannelDataAsync(channel, client);
         }
@@ -40,6 +45,7 @@ public class ParsingService : BaseService, IParsingService
     
     public async Task UpdateChannelsDataAsync(WTelegramService wt)
     {
+        /*
         Console.WriteLine("Updating channels data");
         
         var client = wt.Client;
@@ -61,19 +67,35 @@ public class ParsingService : BaseService, IParsingService
 
             await UpdateChannelDataAsync(channel, client);
         }
+        */
     }
 
     private async Task SaveChannelDataAsync(TL.Channel channel, Client client)
     {
         var channelId = await SaveChannelAsync(channel);
-        var allMessages = await client.Messages_GetHistory(channel);
 
-        foreach (var m in allMessages.Messages)
+        int limit = 100;
+        for (int offset = 0; ; offset += limit)
         {
-            if (m is not Message message)
-                continue;
+            var allMessages = await client.Messages_GetHistory(channel, add_offset: offset, limit: 100);
 
-            await SavePostDataAsync(message, channel, channelId, client);
+            foreach (var m in allMessages.Messages)
+            {
+                if (m is not Message message)
+                    continue;
+
+                await SavePostDataAsync(message, channel, channelId, client);
+            }
+            
+            // Random delay
+            Random random = new Random();
+            var mseconds = random.Next(3, 10) * 1000;   
+            Thread.Sleep(mseconds);
+
+            if (allMessages.Count == 0 || allMessages.Messages[0].Date < new DateTime(2024, 1, 1))
+            {
+                break;
+            }
         }
     }
 
