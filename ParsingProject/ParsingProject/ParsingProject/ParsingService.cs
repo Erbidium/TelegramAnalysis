@@ -12,8 +12,14 @@ namespace ParsingProject;
 
 public class ParsingService : BaseService, IParsingService
 {
+    private TimeSpan _updateDeltaTime = TimeSpan.FromDays(3);
+
+    private DBRepository _dbRepository;
+
     public ParsingService(ParsingProjectContext context, IMapper mapper) : base(context, mapper)
-    { }
+    {
+        _dbRepository = new DBRepository(context);
+    }
 
     public async Task ParseChannelsDataAsync(WTelegramService wt)
     {
@@ -69,7 +75,7 @@ public class ParsingService : BaseService, IParsingService
 
     private async Task SaveChannelDataAsync(TL.Channel channel, Client client)
     {
-        var channelId = await SaveChannelAsync(channel);
+        var channelId = await _dbRepository.SaveChannelAsync(channel);
 
         int limit = 1;
         for (int offset = 0; ; offset += limit)
@@ -95,7 +101,7 @@ public class ParsingService : BaseService, IParsingService
 
     private async Task SavePostDataAsync(Message message, TL.Channel channel, long channelId, Client client)
     {
-        var postId = await SavePostAsync(message, channelId);
+        var postId = await _dbRepository.SavePostAsync(message, channelId);
         
         if (message.replies is not null)
         {
@@ -109,7 +115,7 @@ public class ParsingService : BaseService, IParsingService
                     if (reply is not Message replyMessage || string.IsNullOrWhiteSpace(replyMessage.message))
                         continue;
 
-                    var commentId = await SaveCommentAsync(replyMessage, postId);
+                    var commentId = await _dbRepository.SaveCommentAsync(replyMessage, postId);
                     
                     foreach (var reactionCount in replyMessage.reactions.results)
                     {
@@ -154,7 +160,7 @@ public class ParsingService : BaseService, IParsingService
     
     private async Task SaveCommentDataAsync(Message replyMessage, long postId)
     {
-        var commentId = await SaveCommentAsync(replyMessage, postId);
+        var commentId = await _dbRepository.SaveCommentAsync(replyMessage, postId);
 
         if (replyMessage.reactions is not null)
         {
@@ -207,7 +213,7 @@ public class ParsingService : BaseService, IParsingService
 
                 if (storedMessage.Hash != message.message.GetHashCode())
                 {
-                    await SavePostAsync(message, storedChannel.Id);
+                    await _dbRepository.SavePostAsync(message, storedChannel.Id);
                 }
 
                 if (message.replies is not null)
@@ -215,7 +221,7 @@ public class ParsingService : BaseService, IParsingService
                     int repliesLimit = 1;
                     for (int repliesOffset = 0;; repliesOffset += repliesLimit)
                     {
-                        var replies = await client.Messages_GetReplies(channel, message.ID, limit: repliesLimit, add_offset: offset);
+                        var replies = await client.Messages_GetReplies(channel, message.ID, limit: repliesLimit, add_offset: repliesOffset);
 
                         foreach (var reply in replies.Messages)
                         {
@@ -265,7 +271,7 @@ public class ParsingService : BaseService, IParsingService
                             await _context.SaveChangesAsync();
                         }
                         
-                        if (replies.Count == 0 || replies.Messages[0].Date < DateTime.Now - TimeSpan.FromDays(3))
+                        if (replies.Count == 0 || replies.Messages[0].Date < DateTime.Now - _updateDeltaTime)
                         {
                             break;
                         }
@@ -300,67 +306,11 @@ public class ParsingService : BaseService, IParsingService
                 }
             }
             
-            if (allMessages.Count == 0 || allMessages.Messages[0].Date < DateTime.Now - TimeSpan.FromDays(3))
+            if (allMessages.Count == 0 || allMessages.Messages[0].Date < DateTime.Now - _updateDeltaTime)
             {
                 break;
             }
         }
-    }
-
-    private async Task<long> SaveChannelAsync(TL.Channel chat)
-    {
-        var channelDbModel = new Channel
-        {
-            MainUsername = chat.MainUsername,
-            Title = chat.Title,
-            TelegramId = chat.ID,
-            ParticipantsCount = chat.participants_count
-        };
-
-        _context.Channels.Add(channelDbModel);
-        await _context.SaveChangesAsync();
-
-        return channelDbModel.Id;
-    }
-    
-    private async Task<long> SavePostAsync(Message post, long channelId)
-    {
-        var postDbModel = new Post
-        {
-            TelegramId = post.ID,
-            Text = post.message,
-            Hash = post.message.GetHashCode(),
-            ViewsCount = post.views,
-            CreatedAt = post.Date,
-            EditedAt = post.edit_date,
-            ParsedAt = DateTime.Now,
-            ChannelId = channelId
-        };
-
-        _context.Posts.Add(postDbModel);
-        await _context.SaveChangesAsync();
-
-        return postDbModel.Id;
-    }
-    
-    private async Task<long> SaveCommentAsync(Message comment, long messageId)
-    {
-        var commentDbModel = new Comment
-        {
-            TelegramId = comment.ID,
-            Text = comment.message,
-            Hash = comment.message.GetHashCode(),
-            ViewsCount = comment.views,
-            CreatedAt = comment.Date,
-            EditedAt = comment.edit_date,
-            PostId = messageId,
-            ParsedAt = DateTime.Now
-        };
-
-        _context.Comments.Add(commentDbModel);
-        await _context.SaveChangesAsync();
-
-        return commentDbModel.Id;
     }
 
     private void RandomDelay()
