@@ -3,7 +3,7 @@ using ParsingProject.DAL.Entities;
 using TL;
 using Channel = ParsingProject.DAL.Entities.Channel;
 
-namespace ParsingProject;
+namespace ParsingProject.BLL.Services;
 
 public class DBRepository
 {
@@ -68,5 +68,46 @@ public class DBRepository
         await _context.SaveChangesAsync();
 
         return commentDbModel.Id;
+    }
+    
+    public async Task SavePostReactionsAsync(Message message, long postId)
+    {
+        foreach (var reactionCount in message.reactions.results)
+        {
+            _context.PostReactions.Add(new PostReaction
+            {
+                PostId = postId,
+                Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                Count = reactionCount.count,
+                ParsedAt = DateTime.Now
+            });
+        }
+
+        await _context.SaveChangesAsync();
+    }
+
+    public void SavePostReaction(ReactionCount reactionCount, long postId)
+    {
+        _context.PostReactions.Add(new PostReaction
+        {
+            PostId = postId,
+            Emoticon = (reactionCount.reaction as dynamic).emoticon,
+            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+            Count = reactionCount.count,
+            ParsedAt = DateTime.Now
+        });
+    }
+    
+    public void SaveCommentReaction(ReactionCount reactionCount, long commentId)
+    {
+        _context.CommentReactions.Add(new CommentReaction
+        {
+            CommentId = commentId,
+            Emoticon = (reactionCount.reaction as dynamic).emoticon,
+            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+            Count = reactionCount.count,
+            ParsedAt = DateTime.Now
+        });
     }
 }

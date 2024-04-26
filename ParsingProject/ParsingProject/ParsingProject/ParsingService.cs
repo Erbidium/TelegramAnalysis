@@ -3,10 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Services;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
-using ParsingProject.DAL.Entities;
 using TL;
 using WTelegram;
-using Channel = ParsingProject.DAL.Entities.Channel;
 
 namespace ParsingProject;
 
@@ -119,14 +117,7 @@ public class ParsingService : BaseService, IParsingService
                     
                     foreach (var reactionCount in replyMessage.reactions.results)
                     {
-                        _context.CommentReactions.Add(new CommentReaction
-                        {
-                            CommentId = commentId,
-                            Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                            Count = reactionCount.count,
-                            ParsedAt = DateTime.Now
-                        });
+                        _dbRepository.SaveCommentReaction(reactionCount, commentId);
                     }
                 
                     await _context.SaveChangesAsync();
@@ -142,19 +133,7 @@ public class ParsingService : BaseService, IParsingService
         }
         if (message.reactions is not null)
         {
-            foreach (var reactionCount in message.reactions.results)
-            {
-                _context.PostReactions.Add(new PostReaction
-                {
-                    PostId = postId,
-                    Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                    Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                    Count = reactionCount.count,
-                    ParsedAt = DateTime.Now
-                });
-            }
-
-            await _context.SaveChangesAsync();
+            await _dbRepository.SavePostReactionsAsync(message, postId);
         }
     }
     
@@ -166,14 +145,7 @@ public class ParsingService : BaseService, IParsingService
         {
             foreach (var reactionCount in replyMessage.reactions.results)
             {
-                _context.CommentReactions.Add(new CommentReaction
-                {
-                    CommentId = commentId,
-                    Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                    Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                    Count = reactionCount.count,
-                    ParsedAt = DateTime.Now
-                });
+                _dbRepository.SaveCommentReaction(reactionCount, commentId);
             }
         }
 
@@ -255,15 +227,7 @@ public class ParsingService : BaseService, IParsingService
 
                                     if (storedReaction == null || storedReaction.Count != reactionCount.count)
                                     {
-                                        _context.CommentReactions.Add(new CommentReaction
-                                        {
-                                            CommentId = storedReply.Id,
-                                            Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                                            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic)
-                                                .emoticon),
-                                            Count = reactionCount.count,
-                                            ParsedAt = DateTime.Now
-                                        });
+                                        _dbRepository.SaveCommentReaction(reactionCount, storedReply.Id);
                                     }
                                 }
                             }
@@ -291,14 +255,7 @@ public class ParsingService : BaseService, IParsingService
 
                         if (storedReaction == null || storedReaction.Count != reactionCount.count)
                         {
-                            _context.PostReactions.Add(new PostReaction
-                            {
-                                PostId = storedMessage.Id,
-                                Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                                Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                                Count = reactionCount.count,
-                                ParsedAt = DateTime.Now
-                            });
+                            _dbRepository.SavePostReaction(reactionCount, storedMessage.Id);
                         }
                     }
 
