@@ -74,13 +74,7 @@ public class DBRepository
     {
         foreach (var reactionCount in message.reactions.results)
         {
-            _context.PostReactions.Add(new PostReaction
-            {
-                PostId = postId,
-                Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                Count = reactionCount.count,
-                ParsedAt = DateTime.Now
-            });
+            SavePostReaction(reactionCount, postId);
         }
 
         await _context.SaveChangesAsync();

@@ -38,7 +38,7 @@ public class ParsingService : BaseService, IParsingService
             if (chat is not TL.Channel channel)
                 continue;
             
-            RandomDelay();
+            RandomDelay.Wait();
 
             await SaveChannelDataAsync(channel, client);
         }
@@ -88,7 +88,7 @@ public class ParsingService : BaseService, IParsingService
                 await SavePostDataAsync(message, channel, channelId, client);
             }
             
-            RandomDelay();
+            RandomDelay.Wait();
 
             if (allMessages.Count == 0 || allMessages.Messages[0].Date < new DateTime(2024, 1, 1))
             {
@@ -123,7 +123,7 @@ public class ParsingService : BaseService, IParsingService
                     await _context.SaveChangesAsync();
                 }
             
-                RandomDelay();
+                RandomDelay.Wait();
 
                 if (replies.Count == 0)
                 {
@@ -267,13 +267,5 @@ public class ParsingService : BaseService, IParsingService
                 break;
             }
         }
-    }
-
-    private void RandomDelay()
-    {
-        // Random delay
-        Random random = new Random();
-        var mseconds = random.Next(1000, 4000);   
-        Thread.Sleep(mseconds);
     }
 }
