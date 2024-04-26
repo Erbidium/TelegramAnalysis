@@ -78,7 +78,6 @@ public class DBRepository
             {
                 PostId = postId,
                 Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
                 Count = reactionCount.count,
                 ParsedAt = DateTime.Now
             });
@@ -93,7 +92,6 @@ public class DBRepository
         {
             PostId = postId,
             Emoticon = (reactionCount.reaction as dynamic).emoticon,
-            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
             Count = reactionCount.count,
             ParsedAt = DateTime.Now
         });
@@ -105,7 +103,6 @@ public class DBRepository
         {
             CommentId = commentId,
             Emoticon = (reactionCount.reaction as dynamic).emoticon,
-            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
             Count = reactionCount.count,
             ParsedAt = DateTime.Now
         });

@@ -10,8 +10,6 @@ public class CommentReaction
 
     public string Emoticon { get; set; } = string.Empty;
 
-    public string Reaction { get; set; } = string.Empty;
-
     public DateTime ParsedAt { get; set; }
     
     public int Count { get; set; }

@@ -216,12 +216,11 @@ public class ParsingService : BaseService, IParsingService
                             {
                                 foreach (var reactionCount in replyMessage.reactions.results)
                                 {
-                                    string reaction =
-                                        Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+                                    string emoticon = (reactionCount.reaction as dynamic).emoticon;
 
                                     var storedReaction = await _context.CommentReactions.Where(r =>
                                             r.CommentId == storedReply.Id &&
-                                            r.Reaction == reaction)
+                                            r.Emoticon == emoticon)
                                         .OrderByDescending(r => r.ParsedAt)
                                         .FirstOrDefaultAsync();
 
@@ -246,10 +245,10 @@ public class ParsingService : BaseService, IParsingService
                 {
                     foreach (var reactionCount in message.reactions.results)
                     {
-                        string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+                        string emoticon = (reactionCount.reaction as dynamic).emoticon;
 
                         var storedReaction = await _context.PostReactions.Where(r => r.PostId == storedMessage.Id &&
-                                r.Reaction == reaction)
+                                r.Emoticon == emoticon)
                             .OrderByDescending(r => r.ParsedAt)
                             .FirstOrDefaultAsync();
 
