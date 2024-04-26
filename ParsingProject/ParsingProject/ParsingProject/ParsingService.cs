@@ -212,53 +212,63 @@ public class ParsingService : BaseService, IParsingService
 
                 if (message.replies is not null)
                 {
-
-                    var replies = await client.Messages_GetReplies(channel, message.ID);
-
-                    foreach (var reply in replies.Messages)
+                    int repliesLimit = 1;
+                    for (int repliesOffset = 0;; repliesOffset += repliesLimit)
                     {
-                        if (reply is not Message replyMessage)
-                            continue;
+                        var replies = await client.Messages_GetReplies(channel, message.ID, limit: repliesLimit, add_offset: offset);
 
-                        var storedReply = await _context.Comments
-                            .Where(c => c.TelegramId == replyMessage.ID)
-                            .OrderByDescending(p => p.ParsedAt)
-                            .FirstOrDefaultAsync();
-
-                        if (storedReply is null ||
-                            storedReply.Hash != replyMessage.message.GetHashCode())
+                        foreach (var reply in replies.Messages)
                         {
-                            await SaveCommentDataAsync(replyMessage, storedMessage.Id);
-                            continue;
-                        }
+                            if (reply is not Message replyMessage)
+                                continue;
 
-                        if (replyMessage.reactions is not null)
-                        {
-                            foreach (var reactionCount in replyMessage.reactions.results)
+                            var storedReply = await _context.Comments
+                                .Where(c => c.TelegramId == replyMessage.ID)
+                                .OrderByDescending(p => p.ParsedAt)
+                                .FirstOrDefaultAsync();
+
+                            if (storedReply is null ||
+                                storedReply.Hash != replyMessage.message.GetHashCode())
                             {
-                                string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+                                await SaveCommentDataAsync(replyMessage, storedMessage.Id);
+                                continue;
+                            }
 
-                                var storedReaction = await _context.CommentReactions.Where(r =>
-                                        r.CommentId == storedReply.Id &&
-                                        r.Reaction == reaction)
-                                    .OrderByDescending(r => r.ParsedAt)
-                                    .FirstOrDefaultAsync();
-
-                                if (storedReaction == null || storedReaction.Count != reactionCount.count)
+                            if (replyMessage.reactions is not null)
+                            {
+                                foreach (var reactionCount in replyMessage.reactions.results)
                                 {
-                                    _context.CommentReactions.Add(new CommentReaction
+                                    string reaction =
+                                        Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+
+                                    var storedReaction = await _context.CommentReactions.Where(r =>
+                                            r.CommentId == storedReply.Id &&
+                                            r.Reaction == reaction)
+                                        .OrderByDescending(r => r.ParsedAt)
+                                        .FirstOrDefaultAsync();
+
+                                    if (storedReaction == null || storedReaction.Count != reactionCount.count)
                                     {
-                                        CommentId = storedReply.Id,
-                                        Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                                        Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                                        Count = reactionCount.count,
-                                        ParsedAt = DateTime.Now
-                                    });
+                                        _context.CommentReactions.Add(new CommentReaction
+                                        {
+                                            CommentId = storedReply.Id,
+                                            Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                                            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic)
+                                                .emoticon),
+                                            Count = reactionCount.count,
+                                            ParsedAt = DateTime.Now
+                                        });
+                                    }
                                 }
                             }
-                        }
 
-                        await _context.SaveChangesAsync();
+                            await _context.SaveChangesAsync();
+                        }
+                        
+                        if (replies.Count == 0 || replies.Messages[0].Date < DateTime.Now - TimeSpan.FromDays(3))
+                        {
+                            break;
+                        }
                     }
                 }
 
