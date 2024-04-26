@@ -99,28 +99,39 @@ public class ParsingService : BaseService, IParsingService
         
         if (message.replies is not null)
         {
-            var replies = await client.Messages_GetReplies(channel, message.ID);
-
-            foreach (var reply in replies.Messages)
+            int limit = 1;
+            for (int offset = 0; ; offset += limit)
             {
-                if (reply is not Message replyMessage || string.IsNullOrWhiteSpace(replyMessage.message))
-                    continue;
+                var replies = await client.Messages_GetReplies(channel, message.ID, limit: limit, add_offset: offset);
 
-                var commentId = await SaveCommentAsync(replyMessage, postId);
-                    
-                foreach (var reactionCount in replyMessage.reactions.results)
+                foreach (var reply in replies.Messages)
                 {
-                    _context.CommentReactions.Add(new CommentReaction
+                    if (reply is not Message replyMessage || string.IsNullOrWhiteSpace(replyMessage.message))
+                        continue;
+
+                    var commentId = await SaveCommentAsync(replyMessage, postId);
+                    
+                    foreach (var reactionCount in replyMessage.reactions.results)
                     {
-                        CommentId = commentId,
-                        Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                        Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                        Count = reactionCount.count,
-                        ParsedAt = DateTime.Now
-                    });
-                }
+                        _context.CommentReactions.Add(new CommentReaction
+                        {
+                            CommentId = commentId,
+                            Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                            Count = reactionCount.count,
+                            ParsedAt = DateTime.Now
+                        });
+                    }
                 
-                await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
+                }
+            
+                RandomDelay();
+
+                if (replies.Count == 0)
+                {
+                    break;
+                }
             }
         }
         if (message.reactions is not null)
@@ -173,104 +184,115 @@ public class ParsingService : BaseService, IParsingService
             return;
         }
         
-        var allMessages = await client.Messages_GetHistory(channel);
-
-        foreach (var m in allMessages.Messages)
+        int limit = 1;
+        for (int offset = 0;; offset += limit)
         {
-            if (m is not Message message)
-                continue;
-            
-            var storedMessage = await _context.Posts
-                .Where(p => p.TelegramId == message.ID)
-                .OrderByDescending(p => p.ParsedAt)
-                .FirstOrDefaultAsync();
+            var allMessages = await client.Messages_GetHistory(channel, limit: limit, add_offset: offset);
 
-            if (storedMessage is null)
+            foreach (var m in allMessages.Messages)
             {
-                await SavePostDataAsync(message, channel, storedChannel.Id, client);
-                continue;
-            }
+                if (m is not Message message)
+                    continue;
 
-            if (storedMessage.Hash != message.message.GetHashCode())
-            {
-                await SavePostAsync(message, storedChannel.Id);
-            }
-            
-            if (message.replies is not null)
-            {
-                var replies = await client.Messages_GetReplies(channel, message.ID);
+                var storedMessage = await _context.Posts
+                    .Where(p => p.TelegramId == message.ID)
+                    .OrderByDescending(p => p.ParsedAt)
+                    .FirstOrDefaultAsync();
 
-                foreach (var reply in replies.Messages)
+                if (storedMessage is null)
                 {
-                    if (reply is not Message replyMessage)
-                        continue;
-                    
-                    var storedReply = await _context.Comments
-                        .Where(c => c.TelegramId == replyMessage.ID)
-                        .OrderByDescending(p => p.ParsedAt)
-                        .FirstOrDefaultAsync();
-                    
-                    if (storedReply is null ||
-                        storedReply.Hash != replyMessage.message.GetHashCode())
-                    {
-                        await SaveCommentDataAsync(replyMessage, storedMessage.Id);
-                        continue;
-                    }
+                    await SavePostDataAsync(message, channel, storedChannel.Id, client);
+                    continue;
+                }
 
-                    if (replyMessage.reactions is not null)
+                if (storedMessage.Hash != message.message.GetHashCode())
+                {
+                    await SavePostAsync(message, storedChannel.Id);
+                }
+
+                if (message.replies is not null)
+                {
+
+                    var replies = await client.Messages_GetReplies(channel, message.ID);
+
+                    foreach (var reply in replies.Messages)
                     {
-                        foreach (var reactionCount in replyMessage.reactions.results)
+                        if (reply is not Message replyMessage)
+                            continue;
+
+                        var storedReply = await _context.Comments
+                            .Where(c => c.TelegramId == replyMessage.ID)
+                            .OrderByDescending(p => p.ParsedAt)
+                            .FirstOrDefaultAsync();
+
+                        if (storedReply is null ||
+                            storedReply.Hash != replyMessage.message.GetHashCode())
                         {
-                            string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
-                            
-                            var storedReaction = await _context.CommentReactions.Where(r => r.CommentId == storedReply.Id &&
-                                                        r.Reaction == reaction)
-                                                    .OrderByDescending(r => r.ParsedAt)
-                                                    .FirstOrDefaultAsync();
+                            await SaveCommentDataAsync(replyMessage, storedMessage.Id);
+                            continue;
+                        }
 
-                            if (storedReaction == null || storedReaction.Count != reactionCount.count)
+                        if (replyMessage.reactions is not null)
+                        {
+                            foreach (var reactionCount in replyMessage.reactions.results)
                             {
-                                _context.CommentReactions.Add(new CommentReaction
+                                string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+
+                                var storedReaction = await _context.CommentReactions.Where(r =>
+                                        r.CommentId == storedReply.Id &&
+                                        r.Reaction == reaction)
+                                    .OrderByDescending(r => r.ParsedAt)
+                                    .FirstOrDefaultAsync();
+
+                                if (storedReaction == null || storedReaction.Count != reactionCount.count)
                                 {
-                                    CommentId = storedReply.Id,
-                                    Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                                    Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                                    Count = reactionCount.count,
-                                    ParsedAt = DateTime.Now
-                                });
+                                    _context.CommentReactions.Add(new CommentReaction
+                                    {
+                                        CommentId = storedReply.Id,
+                                        Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                                        Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                                        Count = reactionCount.count,
+                                        ParsedAt = DateTime.Now
+                                    });
+                                }
                             }
+                        }
+
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
+                if (message.reactions is not null)
+                {
+                    foreach (var reactionCount in message.reactions.results)
+                    {
+                        string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
+
+                        var storedReaction = await _context.PostReactions.Where(r => r.PostId == storedMessage.Id &&
+                                r.Reaction == reaction)
+                            .OrderByDescending(r => r.ParsedAt)
+                            .FirstOrDefaultAsync();
+
+                        if (storedReaction == null || storedReaction.Count != reactionCount.count)
+                        {
+                            _context.PostReactions.Add(new PostReaction
+                            {
+                                PostId = storedMessage.Id,
+                                Emoticon = (reactionCount.reaction as dynamic).emoticon,
+                                Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
+                                Count = reactionCount.count,
+                                ParsedAt = DateTime.Now
+                            });
                         }
                     }
 
                     await _context.SaveChangesAsync();
                 }
             }
-
-            if (message.reactions is not null)
+            
+            if (allMessages.Count == 0 || allMessages.Messages[0].Date < DateTime.Now - TimeSpan.FromDays(3))
             {
-                foreach (var reactionCount in message.reactions.results)
-                {
-                    string reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon);
-
-                    var storedReaction = await _context.PostReactions.Where(r => r.PostId == storedMessage.Id &&
-                            r.Reaction == reaction)
-                        .OrderByDescending(r => r.ParsedAt)
-                        .FirstOrDefaultAsync();
-
-                    if (storedReaction == null || storedReaction.Count != reactionCount.count)
-                    {
-                        _context.PostReactions.Add(new PostReaction
-                        {
-                            PostId = storedMessage.Id,
-                            Emoticon = (reactionCount.reaction as dynamic).emoticon,
-                            Reaction = Reactions.ReactionsMap((reactionCount.reaction as dynamic).emoticon),
-                            Count = reactionCount.count,
-                            ParsedAt = DateTime.Now
-                        });
-                    }
-                }
-
-                await _context.SaveChangesAsync();
+                break;
             }
         }
     }
