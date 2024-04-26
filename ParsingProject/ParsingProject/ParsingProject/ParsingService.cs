@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Services;
 using ParsingProject.BLL.Services.Abstract;
@@ -308,8 +308,8 @@ public class ParsingService : BaseService, IParsingService
             Text = post.message,
             Hash = post.message.GetHashCode(),
             ViewsCount = post.views,
-            Date = post.Date,
-            EditDate = post.edit_date,
+            CreatedAt = post.Date,
+            EditedAt = post.edit_date,
             ParsedAt = DateTime.Now,
             ChannelId = channelId
         };
@@ -328,8 +328,8 @@ public class ParsingService : BaseService, IParsingService
             Text = comment.message,
             Hash = comment.message.GetHashCode(),
             ViewsCount = comment.views,
-            Date = comment.Date,
-            EditDate = comment.edit_date,
+            CreatedAt = comment.Date,
+            EditedAt = comment.edit_date,
             PostId = messageId,
             ParsedAt = DateTime.Now
         };

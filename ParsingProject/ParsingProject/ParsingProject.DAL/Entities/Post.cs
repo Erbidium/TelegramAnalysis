@@ -10,9 +10,9 @@ public class Post
     public int Hash { get; set; }
     public int ViewsCount { get; set; }
     
-    public DateTime Date { get; set; }
+    public DateTime CreatedAt { get; set; }
     
-    public DateTime EditDate { get; set; }
+    public DateTime EditedAt { get; set; }
     
     public DateTime ParsedAt { get; set; }
     

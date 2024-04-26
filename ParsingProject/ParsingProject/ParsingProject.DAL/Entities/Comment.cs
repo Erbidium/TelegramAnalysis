@@ -10,9 +10,9 @@ public class Comment
     
     public int ViewsCount { get; set; }
     
-    public DateTime Date { get; set; }
+    public DateTime CreatedAt { get; set; }
     
-    public DateTime EditDate { get; set; }
+    public DateTime EditedAt { get; set; }
     
     public DateTime ParsedAt { get; set; }
     public long PostId { get; set; }
