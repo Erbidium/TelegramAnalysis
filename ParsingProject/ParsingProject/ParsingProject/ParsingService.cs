@@ -34,10 +34,7 @@ public class ParsingService : BaseService, IParsingService
             if (chat is not TL.Channel channel)
                 continue;
             
-            // Random delay
-            Random random = new Random();
-            var mseconds = random.Next(1000, 4000);   
-            Thread.Sleep(mseconds);
+            RandomDelay();
 
             await SaveChannelDataAsync(channel, client);
         }
@@ -87,10 +84,7 @@ public class ParsingService : BaseService, IParsingService
                 await SavePostDataAsync(message, channel, channelId, client);
             }
             
-            // Random delay
-            Random random = new Random();
-            var mseconds = random.Next(1000, 4000);   
-            Thread.Sleep(mseconds);
+            RandomDelay();
 
             if (allMessages.Count == 0 || allMessages.Messages[0].Date < new DateTime(2024, 1, 1))
             {
@@ -102,8 +96,7 @@ public class ParsingService : BaseService, IParsingService
     private async Task SavePostDataAsync(Message message, TL.Channel channel, long channelId, Client client)
     {
         var postId = await SavePostAsync(message, channelId);
-
-        /*
+        
         if (message.replies is not null)
         {
             var replies = await client.Messages_GetReplies(channel, message.ID);
@@ -130,7 +123,6 @@ public class ParsingService : BaseService, IParsingService
                 await _context.SaveChangesAsync();
             }
         }
-        */
         if (message.reactions is not null)
         {
             foreach (var reactionCount in message.reactions.results)
@@ -337,5 +329,13 @@ public class ParsingService : BaseService, IParsingService
         await _context.SaveChangesAsync();
 
         return commentDbModel.Id;
+    }
+
+    private void RandomDelay()
+    {
+        // Random delay
+        Random random = new Random();
+        var mseconds = random.Next(1000, 4000);   
+        Thread.Sleep(mseconds);
     }
 }
