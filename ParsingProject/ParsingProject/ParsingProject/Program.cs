@@ -23,7 +23,9 @@ builder.Services.AddHostedService(
 
 builder.Services.AddDbContext<ParsingProjectContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options
+        .UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseLowerCaseNamingConvention();
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

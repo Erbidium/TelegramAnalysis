@@ -60,6 +60,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ParsingPro
         var builder = new DbContextOptionsBuilder<ParsingProjectContext>();
         var connectionString = configuration.GetConnectionString("DefaultConnection");
         builder.UseSqlServer(connectionString);
+        builder.UseLowerCaseNamingConvention();
         return new ParsingProjectContext(builder.Options);
     }
 }
