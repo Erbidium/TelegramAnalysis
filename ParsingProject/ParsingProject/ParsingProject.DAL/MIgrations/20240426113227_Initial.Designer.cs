@@ -12,8 +12,8 @@ using ParsingProject.DAL.Context;
 namespace ParsingProject.DAL.Migrations
 {
     [DbContext(typeof(ParsingProjectContext))]
-    [Migration("20240426103312_Rename dates columns")]
-    partial class Renamedatescolumns
+    [Migration("20240426113227_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
