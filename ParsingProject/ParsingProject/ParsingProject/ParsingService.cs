@@ -198,8 +198,7 @@ public class ParsingService : BaseService, IParsingService
                 continue;
             }
 
-            if (storedMessage.Hash != message.message.GetHashCode() ||
-                storedMessage.Text != message.message)
+            if (storedMessage.Hash != message.message.GetHashCode())
             {
                 await SavePostAsync(message, storedChannel.Id);
             }
@@ -219,8 +218,7 @@ public class ParsingService : BaseService, IParsingService
                         .FirstOrDefaultAsync();
                     
                     if (storedReply is null ||
-                        (storedReply.Hash != replyMessage.message.GetHashCode() || 
-                         storedReply.Text != replyMessage.message))
+                        storedReply.Hash != replyMessage.message.GetHashCode())
                     {
                         await SaveCommentDataAsync(replyMessage, storedMessage.Id);
                         continue;
