@@ -12,9 +12,9 @@ public static class ApplicationBuilderExtensions
         if (context != null /*&& context.Database.GetPendingMigrations().Any()*/)
         {
             //temp clear db for dev purposes
-            bool wasDeleted = context.Database.EnsureDeleted();
+            //bool wasDeleted = context.Database.EnsureDeleted();
             
-            context.Database.Migrate();
+            //context.Database.Migrate();
         }
     }
 }

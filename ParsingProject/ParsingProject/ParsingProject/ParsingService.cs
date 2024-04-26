@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Services;
 using ParsingProject.BLL.Services.Abstract;
@@ -36,7 +36,7 @@ public class ParsingService : BaseService, IParsingService
             
             // Random delay
             Random random = new Random();
-            var mseconds = random.Next(3, 10) * 1000;   
+            var mseconds = random.Next(1000, 4000);   
             Thread.Sleep(mseconds);
 
             await SaveChannelDataAsync(channel, client);
@@ -74,14 +74,14 @@ public class ParsingService : BaseService, IParsingService
     {
         var channelId = await SaveChannelAsync(channel);
 
-        int limit = 100;
+        int limit = 1;
         for (int offset = 0; ; offset += limit)
         {
-            var allMessages = await client.Messages_GetHistory(channel, add_offset: offset, limit: 100);
+            var allMessages = await client.Messages_GetHistory(channel, add_offset: offset, limit: 1);
 
             foreach (var m in allMessages.Messages)
             {
-                if (m is not Message message)
+                if (m is not Message message || string.IsNullOrWhiteSpace(message.message))
                     continue;
 
                 await SavePostDataAsync(message, channel, channelId, client);
@@ -89,7 +89,7 @@ public class ParsingService : BaseService, IParsingService
             
             // Random delay
             Random random = new Random();
-            var mseconds = random.Next(3, 10) * 1000;   
+            var mseconds = random.Next(1000, 4000);   
             Thread.Sleep(mseconds);
 
             if (allMessages.Count == 0 || allMessages.Messages[0].Date < new DateTime(2024, 1, 1))
@@ -103,13 +103,14 @@ public class ParsingService : BaseService, IParsingService
     {
         var postId = await SavePostAsync(message, channelId);
 
+        /*
         if (message.replies is not null)
         {
             var replies = await client.Messages_GetReplies(channel, message.ID);
 
             foreach (var reply in replies.Messages)
             {
-                if (reply is not Message replyMessage)
+                if (reply is not Message replyMessage || string.IsNullOrWhiteSpace(replyMessage.message))
                     continue;
 
                 var commentId = await SaveCommentAsync(replyMessage, postId);
@@ -129,7 +130,7 @@ public class ParsingService : BaseService, IParsingService
                 await _context.SaveChangesAsync();
             }
         }
-
+        */
         if (message.reactions is not null)
         {
             foreach (var reactionCount in message.reactions.results)
