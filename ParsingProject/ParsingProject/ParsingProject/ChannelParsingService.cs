@@ -8,15 +8,28 @@ using WTelegram;
 
 namespace ParsingProject;
 
-public class ParsingService : BaseService, IParsingService
+public class ChannelParsingService : BaseService, IChannelParsingService
 {
     private TimeSpan _updateDeltaTime = TimeSpan.FromDays(3);
 
+    private PostService _postService;
+    private CommentService _commentService;
+
     private DBRepository _dbRepository;
 
-    public ParsingService(ParsingProjectContext context, IMapper mapper) : base(context, mapper)
+    public ChannelParsingService
+    (
+        PostService postService,
+        CommentService commentService,
+        DBRepository dbRepository,
+        ParsingProjectContext context,
+        IMapper mapper
+    ) :
+        base(context, mapper)
     {
-        _dbRepository = new DBRepository(context);
+        _postService = postService;
+        _commentService = commentService;
+        _dbRepository = dbRepository;
     }
 
     public async Task ParseChannelsDataAsync(WTelegramService wt)
@@ -35,7 +48,7 @@ public class ParsingService : BaseService, IParsingService
             if (!chat.IsChannel || !chat.IsActive)
                 continue;
 
-            if (chat is not TL.Channel channel)
+            if (chat is not Channel channel)
                 continue;
             
             RandomDelay.Wait();
@@ -71,7 +84,7 @@ public class ParsingService : BaseService, IParsingService
         */
     }
 
-    private async Task SaveChannelDataAsync(TL.Channel channel, Client client)
+    private async Task SaveChannelDataAsync(Channel channel, Client client)
     {
         var channelId = await _dbRepository.SaveChannelAsync(channel);
 
@@ -85,7 +98,7 @@ public class ParsingService : BaseService, IParsingService
                 if (m is not Message message || string.IsNullOrWhiteSpace(message.message))
                     continue;
 
-                await SavePostDataAsync(message, channel, channelId, client);
+                await _postService.SavePostDataAsync(message, channel, channelId, client);
             }
             
             RandomDelay.Wait();
@@ -97,62 +110,7 @@ public class ParsingService : BaseService, IParsingService
         }
     }
 
-    private async Task SavePostDataAsync(Message message, TL.Channel channel, long channelId, Client client)
-    {
-        var postId = await _dbRepository.SavePostAsync(message, channelId);
-        
-        if (message.replies is not null)
-        {
-            int limit = 1;
-            for (int offset = 0; ; offset += limit)
-            {
-                var replies = await client.Messages_GetReplies(channel, message.ID, limit: limit, add_offset: offset);
-
-                foreach (var reply in replies.Messages)
-                {
-                    if (reply is not Message replyMessage || string.IsNullOrWhiteSpace(replyMessage.message))
-                        continue;
-
-                    var commentId = await _dbRepository.SaveCommentAsync(replyMessage, postId);
-                    
-                    foreach (var reactionCount in replyMessage.reactions.results)
-                    {
-                        _dbRepository.SaveCommentReaction(reactionCount, commentId);
-                    }
-                
-                    await _context.SaveChangesAsync();
-                }
-            
-                RandomDelay.Wait();
-
-                if (replies.Count == 0)
-                {
-                    break;
-                }
-            }
-        }
-        if (message.reactions is not null)
-        {
-            await _dbRepository.SavePostReactionsAsync(message, postId);
-        }
-    }
-    
-    private async Task SaveCommentDataAsync(Message replyMessage, long postId)
-    {
-        var commentId = await _dbRepository.SaveCommentAsync(replyMessage, postId);
-
-        if (replyMessage.reactions is not null)
-        {
-            foreach (var reactionCount in replyMessage.reactions.results)
-            {
-                _dbRepository.SaveCommentReaction(reactionCount, commentId);
-            }
-        }
-
-        await _context.SaveChangesAsync();
-    }
-
-    private async Task UpdateChannelDataAsync(TL.Channel channel, Client client)
+    private async Task UpdateChannelDataAsync(Channel channel, Client client)
     {
         var storedChannel = await _context.Channels.FirstOrDefaultAsync(c => c.TelegramId == channel.ID);
 
@@ -179,7 +137,7 @@ public class ParsingService : BaseService, IParsingService
 
                 if (storedMessage is null)
                 {
-                    await SavePostDataAsync(message, channel, storedChannel.Id, client);
+                    await _postService.SavePostDataAsync(message, channel, storedChannel.Id, client);
                     continue;
                 }
 
@@ -208,7 +166,7 @@ public class ParsingService : BaseService, IParsingService
                             if (storedReply is null ||
                                 storedReply.Hash != replyMessage.message.GetHashCode())
                             {
-                                await SaveCommentDataAsync(replyMessage, storedMessage.Id);
+                                await _commentService.SaveCommentDataAsync(replyMessage, storedMessage.Id);
                                 continue;
                             }
 

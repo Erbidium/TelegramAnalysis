@@ -1,6 +1,6 @@
 ﻿namespace ParsingProject;
 
-public interface IParsingService
+public interface IChannelParsingService
 {
     Task ParseChannelsDataAsync(WTelegramService wt);
 

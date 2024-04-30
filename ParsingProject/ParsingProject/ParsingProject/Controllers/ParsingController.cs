@@ -11,16 +11,16 @@ public class ParsingController : ControllerBase
     
     private readonly ILogger<ParsingController> _logger;
 
-    private readonly IParsingService _parsingService;
+    private readonly IChannelParsingService _channelParsingService;
     private readonly ParsingUpdateHostedService _parsingUpdateHostedService;
 
     public ParsingController(
-        IParsingService parsingService,
+        IChannelParsingService channelParsingService,
         ParsingUpdateHostedService parsingUpdateHostedService,
         ILogger<ParsingController> logger,
         WTelegramService wt)
     {
-        _parsingService = parsingService;
+        _channelParsingService = channelParsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
         _logger = logger;
         WT = wt;
@@ -29,7 +29,7 @@ public class ParsingController : ControllerBase
     [HttpGet(Name = "ParseChannels")]
     public async Task<IActionResult> Get()
     {
-        await _parsingService.ParseChannelsDataAsync(WT);
+        await _channelParsingService.ParseChannelsDataAsync(WT);
 
         return Ok();
     }

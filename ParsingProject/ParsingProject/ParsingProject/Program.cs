@@ -12,7 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddScoped<IParsingService, ParsingService>();
+builder.Services.AddScoped<IChannelParsingService, ChannelParsingService>();
+builder.Services.AddScoped<PostService>();
+builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<DBRepository>();
+
 builder.Services.AddSingleton<ParsingUpdateHostedService>();
 builder.Services.AddHostedService(
     provider => provider.GetRequiredService<ParsingUpdateHostedService>());

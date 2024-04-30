@@ -32,7 +32,7 @@ public class ParsingUpdateHostedService : BackgroundService
                 if (IsEnabled)
                 {
                     await using AsyncServiceScope asyncScope = _factory.CreateAsyncScope();
-                    var parsingService = asyncScope.ServiceProvider.GetRequiredService<IParsingService>();
+                    var parsingService = asyncScope.ServiceProvider.GetRequiredService<IChannelParsingService>();
                     await parsingService.UpdateChannelsDataAsync(_wt);
                     
                     _executionCount++;
