@@ -16,6 +16,7 @@ builder.Services.AddScoped<IChannelParsingService, ChannelParsingService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<DBRepository>();
+builder.Services.AddTransient<DataSeeder>();
 
 builder.Services.AddSingleton<ParsingUpdateHostedService>();
 builder.Services.AddHostedService(
@@ -55,5 +56,16 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+void SeedData(IHost app)
+{
+    var scopedFactory = app.Services.GetService<IServiceScopeFactory>();
+
+    using var scope = scopedFactory?.CreateScope();
+    var service = scope?.ServiceProvider.GetService<DataSeeder>();
+    service?.Seed();
+}
+
+SeedData(app);
 
 app.Run();

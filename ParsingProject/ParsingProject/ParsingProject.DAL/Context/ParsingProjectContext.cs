@@ -12,6 +12,8 @@ public class ParsingProjectContext : DbContext
     public DbSet<PostReaction> PostReactions { get; private set; }
     public DbSet<Comment> Comments { get; private set; }
     public DbSet<CommentReaction> CommentReactions { get; private set; }
+    
+    public DbSet<Reaction> Reactions { get; private set; }
 
     public ParsingProjectContext(DbContextOptions<ParsingProjectContext> options) : base(options)
     {

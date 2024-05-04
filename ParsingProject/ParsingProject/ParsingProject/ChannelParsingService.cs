@@ -205,8 +205,9 @@ public class ChannelParsingService : BaseService, IChannelParsingService
                     {
                         string emoticon = (reactionCount.reaction as dynamic).emoticon;
 
-                        var storedReaction = await _context.PostReactions.Where(r => r.PostId == storedMessage.Id &&
-                                r.Emoticon == emoticon)
+                        var storedReaction = await _context.PostReactions
+                            .Include(r => r.Reaction)
+                            .Where(r => r.Reaction != null && r.PostId == storedMessage.Id && r.Reaction.Emoticon == emoticon)
                             .OrderByDescending(r => r.ParsedAt)
                             .FirstOrDefaultAsync();
 
