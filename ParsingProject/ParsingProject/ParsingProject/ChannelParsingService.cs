@@ -88,10 +88,10 @@ public class ChannelParsingService : BaseService, IChannelParsingService
     {
         var channelId = await _dbRepository.SaveChannelAsync(channel);
 
-        int limit = 1;
+        int limit = 100;
         for (int offset = 0; ; offset += limit)
         {
-            var allMessages = await client.Messages_GetHistory(channel, add_offset: offset, limit: 1);
+            var allMessages = await client.Messages_GetHistory(channel, add_offset: offset, limit: limit);
 
             foreach (var m in allMessages.Messages)
             {

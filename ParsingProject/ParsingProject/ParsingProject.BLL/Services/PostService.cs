@@ -18,7 +18,7 @@ public class PostService : BaseService
     public async Task SavePostDataAsync(Message message, Channel channel, long channelId, Client client)
     {
         var postId = await _dbRepository.SavePostAsync(message, channelId);
-        
+        /*
         if (message.replies is not null)
         {
             int limit = 1;
@@ -49,6 +49,8 @@ public class PostService : BaseService
                 }
             }
         }
+        */
+        
         if (message.reactions is not null)
         {
             await _dbRepository.SavePostReactionsAsync(message, postId);
