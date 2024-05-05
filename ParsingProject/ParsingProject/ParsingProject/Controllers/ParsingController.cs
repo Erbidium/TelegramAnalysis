@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using ParsingProject.DTO;
 
 namespace ParsingProject.Controllers;
@@ -14,14 +15,18 @@ public class ParsingController : ControllerBase
     private readonly IChannelParsingService _channelParsingService;
     private readonly ParsingUpdateHostedService _parsingUpdateHostedService;
 
+    private readonly ChannelsConfig _channels;
+
     public ParsingController(
         IChannelParsingService channelParsingService,
         ParsingUpdateHostedService parsingUpdateHostedService,
+        IOptions<ChannelsConfig> options,
         ILogger<ParsingController> logger,
         WTelegramService wt)
     {
         _channelParsingService = channelParsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
+        _channels = options.Value;
         _logger = logger;
         WT = wt;
     }
