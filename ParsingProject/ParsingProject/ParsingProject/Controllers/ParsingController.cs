@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using ParsingProject.DTO;
+using ParsingProject.BLL.Entities;
+using ParsingProject.DAL.Context;
 
 namespace ParsingProject.Controllers;
 
@@ -17,21 +19,25 @@ public class ParsingController : ControllerBase
 
     private readonly ChannelsConfig _channels;
 
+    private readonly ParsingProjectContext _dataContext;
+
     public ParsingController(
         IChannelParsingService channelParsingService,
         ParsingUpdateHostedService parsingUpdateHostedService,
         IOptions<ChannelsConfig> options,
         ILogger<ParsingController> logger,
-        WTelegramService wt)
+        WTelegramService wt,
+        ParsingProjectContext dataContext)
     {
         _channelParsingService = channelParsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
         _channels = options.Value;
         _logger = logger;
         WT = wt;
+        _dataContext = dataContext;
     }
 
-    [HttpGet(Name = "ParseChannels")]
+    [HttpPost(Name = "parseChannels")]
     public async Task<IActionResult> Get()
     {
         await _channelParsingService.ParseChannelsDataAsync(WT);
@@ -50,4 +56,46 @@ public class ParsingController : ControllerBase
     {
         _parsingUpdateHostedService.IsEnabled = state.IsEnabled;
     }*/
+    
+    [HttpGet("parsingStatistics")]
+    public ActionResult<ParsingStatisticsModel> GetParsingStatistics()
+    {
+        return new ParsingStatisticsModel
+        {
+            ChannelsStatistics = _dataContext.Channels.ToList().Select(c =>
+                {
+                    var channelPosts = _dataContext.Posts.Where(p => p.ChannelId == c.Id);
+                    
+                    var firstChannelParsedPost = channelPosts.OrderBy(p => p.CreatedAt).FirstOrDefault();
+                    var lastChannelParsedPost = channelPosts.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
+
+                    int postsCount = channelPosts.Count();
+                    int parsedReactionsCount = _dataContext.PostReactions
+                        .Include(r => r.Post)
+                        .Count(r => r.Post.ChannelId == c.Id);
+                    
+                    int parsedCommentsCount = _dataContext.Comments
+                        .Include(comment => comment.Post)
+                        .Count(r => r.Post.ChannelId == c.Id);
+                    
+                    return new ChannelStatisticsModel
+                    {
+                        Channel = new ChannelModel
+                        {
+                            Id = c.Id,
+                            TelegramId = c.TelegramId,
+                            ParticipantsCount = c.ParticipantsCount,
+                            MainUsername = c.MainUsername,
+                            Title = c.Title
+                        },
+                        StartDate = firstChannelParsedPost?.CreatedAt,
+                        EndDate = lastChannelParsedPost?.CreatedAt,
+                        ParsedPostsCount = postsCount,
+                        ParsedReactionsCount = parsedReactionsCount,
+                        ParsedCommentsCount = parsedCommentsCount
+                    };
+                }
+            ).ToList()
+        };
+    }
 }
