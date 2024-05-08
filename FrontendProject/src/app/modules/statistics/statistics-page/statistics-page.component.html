@@ -1,0 +1,10 @@
+<mat-card *ngFor="let stat of parsingStatistics">
+    <mat-card-header>
+        <mat-card-title>{{stat.channel.title}}</mat-card-title>
+        <mat-card-subtitle>Учасників: {{stat.channel.participantsCount}}</mat-card-subtitle>
+        <mat-card-content>Постів: {{stat.parsedPostsCount}} Реакцій: {{stat.parsedReactionsCount}}</mat-card-content>
+        <mat-card-actions style="margin-left: 100px;">
+            <button> Переглянути повідомлення</button>
+        </mat-card-actions>
+    </mat-card-header>
+</mat-card>
