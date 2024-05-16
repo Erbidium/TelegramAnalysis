@@ -40,7 +40,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(TestProfile)));
 
 builder.Configuration.AddJsonFile("ChannelsConfig.json");
-builder.Services.Configure<ChannelsConfig>(builder.Configuration.GetSection("Channels"));
 
 var app = builder.Build();
 
