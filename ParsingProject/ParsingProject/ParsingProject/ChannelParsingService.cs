@@ -1,5 +1,6 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using ParsingProject.BLL;
 using ParsingProject.BLL.Services;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
@@ -53,7 +54,7 @@ public class ChannelParsingService : BaseService, IChannelParsingService
             
             RandomDelay.Wait();
 
-            await SaveChannelDataAsync(channel, client);
+            await SaveChannelDataAsync(channel, client, 0, 100);
         }
     }
     
@@ -84,35 +85,25 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         */
     }
 
-    private async Task SaveChannelDataAsync(Channel channel, Client client)
+    private async Task SaveChannelDataAsync(Channel channel, Client client, int offset, int limit)
     {
         var channelId = await _dbRepository.SaveChannelAsync(channel);
+        
+        
+        var allMessages = await client.Messages_GetHistory(channel, limit: 100);
 
-        int limit = 100;
-        for (int offset = 0; ; offset += limit)
+        foreach (var m in allMessages.Messages)
         {
-            var allMessages = await client.Messages_GetHistory(channel, add_offset: offset, limit: limit);
+            if (m is not Message message || string.IsNullOrWhiteSpace(message.message))
+                continue;
 
-            foreach (var m in allMessages.Messages)
-            {
-                if (m is not Message message || string.IsNullOrWhiteSpace(message.message))
-                    continue;
-
-                await _postService.SavePostDataAsync(message, channel, channelId, client);
-            }
-            
-            RandomDelay.Wait();
-
-            if (allMessages.Count == 0 || allMessages.Messages[0].Date < new DateTime(2024, 1, 1))
-            {
-                break;
-            }
+            await _postService.SavePostDataAsync(message, channel, channelId, client);
         }
     }
 
     private async Task UpdateChannelDataAsync(Channel channel, Client client)
     {
-        var storedChannel = await _context.Channels.FirstOrDefaultAsync(c => c.TelegramId == channel.ID);
+        /*var storedChannel = await _context.Channels.FirstOrDefaultAsync(c => c.TelegramId == channel.ID);
 
         if (storedChannel is null)
         {
@@ -225,6 +216,6 @@ public class ChannelParsingService : BaseService, IChannelParsingService
             {
                 break;
             }
-        }
+        }*/
     }
 }

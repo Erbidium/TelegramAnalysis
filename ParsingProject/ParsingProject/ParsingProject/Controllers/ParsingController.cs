@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using ParsingProject.BLL.Entities;
 using ParsingProject.DAL.Context;
 
@@ -17,28 +16,24 @@ public class ParsingController : ControllerBase
     private readonly IChannelParsingService _channelParsingService;
     private readonly ParsingUpdateHostedService _parsingUpdateHostedService;
 
-    private readonly ChannelsConfig _channels;
-
     private readonly ParsingProjectContext _dataContext;
 
     public ParsingController(
         IChannelParsingService channelParsingService,
         ParsingUpdateHostedService parsingUpdateHostedService,
-        IOptions<ChannelsConfig> options,
         ILogger<ParsingController> logger,
         WTelegramService wt,
         ParsingProjectContext dataContext)
     {
         _channelParsingService = channelParsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
-        _channels = options.Value;
         _logger = logger;
         WT = wt;
         _dataContext = dataContext;
     }
 
     [HttpPost(Name = "parseChannels")]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> ParseChannels()
     {
         await _channelParsingService.ParseChannelsDataAsync(WT);
 
@@ -56,7 +51,7 @@ public class ParsingController : ControllerBase
     {
         _parsingUpdateHostedService.IsEnabled = state.IsEnabled;
     }*/
-    
+
     [HttpGet("parsingStatistics")]
     public ActionResult<ParsingStatisticsModel> GetParsingStatistics()
     {
