@@ -14,6 +14,6 @@ export class StatisticsService {
     constructor(private httpService: HttpInternalService) {}
 
     public getParsingStatistics(): Observable<ParsingStatistics> {
-        return this.httpService.getRequest<ParsingStatistics>(`${this.routePrefix}/parsingStatistics`);
+        return this.httpService.getRequest<ParsingStatistics>(`${this.routePrefix}/parsing-statistics`);
     }
 }

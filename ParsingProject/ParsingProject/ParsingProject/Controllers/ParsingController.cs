@@ -32,7 +32,7 @@ public class ParsingController : ControllerBase
         _dataContext = dataContext;
     }
 
-    [HttpPost(Name = "parseChannels")]
+    [HttpPost(Name = "parse-channels")]
     public async Task<IActionResult> ParseChannels()
     {
         await _channelParsingService.ParseChannelsDataAsync(WT);
@@ -52,7 +52,7 @@ public class ParsingController : ControllerBase
         _parsingUpdateHostedService.IsEnabled = state.IsEnabled;
     }*/
 
-    [HttpGet("parsingStatistics")]
+    [HttpGet("parsing-statistics")]
     public ActionResult<ParsingStatisticsModel> GetParsingStatistics()
     {
         return new ParsingStatisticsModel
