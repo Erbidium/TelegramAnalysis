@@ -53,6 +53,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseParsingProjectContext();
 
+app.UseCors(opt => opt
+    .AllowAnyMethod()
+    .AllowAnyHeader()
+    .AllowCredentials()
+    .SetIsOriginAllowed(_ => true));
+
 
 app.UseHttpsRedirection();
 
