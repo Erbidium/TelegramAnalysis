@@ -35,6 +35,11 @@ public class ChannelParsingService : BaseService, IChannelParsingService
 
     public async Task ParseChannelsDataAsync(WTelegramService wt)
     {
+        var parseDataUntilDate = new DateTime(2024, 1, 1);
+        var messagesCountPerRequest = 100;
+
+        bool allChannelsAreParsed = false;
+        
         var client = wt.Client;
         
         //if (wt.User == null) throw new Exception("Complete the login first");
@@ -42,18 +47,45 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         var myself = await client.LoginUserIfNeeded();
         Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
-        var channels = _context.Channels.ToList();
-        var chats = await client.Messages_GetAllChats();
-
-        foreach (var ch in channels)
+        while (!allChannelsAreParsed)
         {
-            RandomDelay.Wait();
+            allChannelsAreParsed = true;
+            
+            var channels = _context.Channels.ToList();
+        
+            await RandomDelay.Wait(1000, 1500);
+            var chats = await client.Messages_GetAllChats();
+            await RandomDelay.Wait();
 
-            var chat = chats.chats[ch.TelegramId];
-            if (chat is not Channel channel)
-                continue;
-
-            await SaveChannelDataAsync(channel, ch.Id, client, 0, 100);
+            foreach (var ch in channels)
+            {
+                var chat = chats.chats[ch.TelegramId];
+                if (chat is not Channel channel)
+                    continue;
+                
+                // find oldest parsed message
+                var oldestMessage = await _context.Posts
+                    .Where(p => p.ChannelId == ch.Id)
+                    .OrderBy(p => p.CreatedAt)
+                    .FirstOrDefaultAsync();
+                
+                if (oldestMessage is null)
+                {
+                    allChannelsAreParsed = false;
+                    await SaveChannelDataAsync(channel, ch.Id, client, 0, messagesCountPerRequest);
+                }
+                else if (oldestMessage.CreatedAt > parseDataUntilDate)
+                {
+                    allChannelsAreParsed = false;
+                    await SaveChannelDataAsync(channel, ch.Id, client, offset_id: (int)oldestMessage.TelegramId, offset: 1, limit: messagesCountPerRequest);
+                }
+                else
+                {
+                    continue;
+                }
+                
+                await RandomDelay.Wait();
+            }
         }
     }
     
@@ -84,16 +116,24 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         */
     }
 
-    private async Task SaveChannelDataAsync(Channel channel, long channelId, Client client, int offset, int limit)
+    private async Task SaveChannelDataAsync(Channel channel, long channelId, Client client, int offset, int limit, int? offset_id = null)
     {
-        var messages = await client.Messages_GetHistory(channel, add_offset: offset, limit: limit);
+        var messages = await client.Messages_GetHistory(channel, add_offset: offset, limit: limit, offset_id: offset_id ?? 0);
 
         foreach (var m in messages.Messages)
         {
             if (m is not Message message || string.IsNullOrWhiteSpace(message.message))
                 continue;
 
-            await _postService.SavePostDataAsync(message, channel, channelId, client);
+            var storedMessage = await _context.Posts
+                .Where(p => p.TelegramId == message.ID)
+                .OrderByDescending(p => p.ParsedAt)
+                .FirstOrDefaultAsync();
+
+            if (storedMessage is null)
+            {
+                await _postService.SavePostDataAsync(message, channel, channelId, client);
+            }
         }
     }
 

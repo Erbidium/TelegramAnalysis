@@ -47,13 +47,13 @@ public class ChannelsController : ControllerBase
         if (resolved.Chat is not Channel channel)
             return BadRequest();
 
-        RandomDelay.Wait(2000, 4000);
+        await RandomDelay.Wait(2000, 4000);
         
         long chatId = resolved.Chat.ID;
         
         var allChats = await client.Messages_GetAllChats();
         
-        RandomDelay.Wait(2000, 4000);
+        await RandomDelay.Wait(2000, 4000);
         
         if (!allChats.chats.TryGetValue(chatId, out _))
         {
