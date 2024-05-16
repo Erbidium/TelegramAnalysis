@@ -42,19 +42,18 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         var myself = await client.LoginUserIfNeeded();
         Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
+        var channels = _context.Channels.ToList();
         var chats = await client.Messages_GetAllChats();
 
-        foreach (var (_, chat) in chats.chats)
+        foreach (var ch in channels)
         {
-            if (!chat.IsChannel || !chat.IsActive)
-                continue;
-
-            if (chat is not Channel channel)
-                continue;
-            
             RandomDelay.Wait();
 
-            await SaveChannelDataAsync(channel, client, 0, 100);
+            var chat = chats.chats[ch.TelegramId];
+            if (chat is not Channel channel)
+                continue;
+
+            await SaveChannelDataAsync(channel, ch.Id, client, 0, 100);
         }
     }
     
@@ -85,14 +84,11 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         */
     }
 
-    private async Task SaveChannelDataAsync(Channel channel, Client client, int offset, int limit)
+    private async Task SaveChannelDataAsync(Channel channel, long channelId, Client client, int offset, int limit)
     {
-        var channelId = await _dbRepository.SaveChannelAsync(channel);
-        
-        
-        var allMessages = await client.Messages_GetHistory(channel, limit: 100);
+        var messages = await client.Messages_GetHistory(channel, add_offset: offset, limit: limit);
 
-        foreach (var m in allMessages.Messages)
+        foreach (var m in messages.Messages)
         {
             if (m is not Message message || string.IsNullOrWhiteSpace(message.message))
                 continue;
