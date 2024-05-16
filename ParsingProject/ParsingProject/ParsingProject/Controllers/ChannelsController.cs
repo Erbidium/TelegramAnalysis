@@ -28,13 +28,13 @@ public class ChannelsController : ControllerBase
         _repository = dbRepository;
     }
     
-    [HttpGet("channelsToParse")]
+    [HttpGet("channels-to-parse")]
     public ActionResult<List<DAL.Entities.Channel>> GetChannelsToParse()
     {
         return _dataContext.Channels.ToList();
     }
     
-    [HttpPost("saveChannel")]
+    [HttpPost("save-channel")]
     public async Task<IActionResult> SaveChannel(string link)
     {
         if (!link.StartsWith("https://t.me/"))
@@ -65,6 +65,17 @@ public class ChannelsController : ControllerBase
             await _repository.SaveChannelAsync(channel);
         }
 
+        return Ok();
+    }
+    
+    [HttpPost("delete-channel")]
+    public async Task<IActionResult> DeleteChannel(long id)
+    {
+        var channel = await _dataContext.Channels.FindAsync(id);
+        if (channel is null)
+            return BadRequest();
+
+        channel.IsDeleted = true;
         return Ok();
     }
 }
