@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ParsingProject.DAL.Context;
 
@@ -11,9 +12,11 @@ using ParsingProject.DAL.Context;
 namespace ParsingProject.DAL.Migrations
 {
     [DbContext(typeof(ParsingProjectContext))]
-    partial class ParsingProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20240516113019_Add IsDeleted to Channels")]
+    partial class AddIsDeletedtoChannels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

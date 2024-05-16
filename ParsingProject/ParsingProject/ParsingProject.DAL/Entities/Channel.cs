@@ -12,4 +12,6 @@ public class Channel
     public string Title { get; set; } = string.Empty;
     
     public ICollection<Post> Posts { get; set; }
+
+    public bool IsDeleted { get; set; } = false;
 }
