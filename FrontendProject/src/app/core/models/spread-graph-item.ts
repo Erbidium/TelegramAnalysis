@@ -4,4 +4,6 @@ export interface SpreadGraphItem {
     similarity: number;
     created_at: number;
     root_id?: number;
+
+    channel_title: string;
 }

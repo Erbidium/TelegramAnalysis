@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, func
+from sqlalchemy import ForeignKey, func, Integer
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 from base import Base
@@ -9,6 +9,7 @@ class Post(Base):
      __tablename__ = "posts"
 
      id: Mapped[int] = mapped_column(primary_key=True)
+     channelid: Mapped[int] = mapped_column(Integer())
      text: Mapped[str] = mapped_column(String(30))
      hash: Mapped[int] = mapped_column()
      viewscount: Mapped[int] = mapped_column()

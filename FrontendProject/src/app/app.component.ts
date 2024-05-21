@@ -24,7 +24,7 @@ export class AppComponent extends BaseComponent implements OnInit {
         for (let i = 0; i < nodeItems.length; i++) {
             nodes.push({
                 id: i + '',
-                name: `Схожість: ${Math.round(nodeItems[i].similarity * 10000) / 100}%\n\nСтворено: ${formatDate(nodeItems[i].created_at, 'short', this.locale)}\n\n${nodeItems[i].text.substring(0, 100)}...`
+                name: `Схожість: ${Math.round(nodeItems[i].similarity * 10000) / 100}%\n\nСтворено: ${formatDate(nodeItems[i].created_at, 'short', this.locale)}\n\nКанал: ${nodeItems[i].channel_title}\n\n${nodeItems[i].text.substring(0, 100)}...`
             });
         }
         return nodes;
