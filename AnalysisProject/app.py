@@ -1,5 +1,6 @@
 import re
 import nltk
+from flask_cors import cross_origin, CORS
 from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
 from sqlalchemy import create_engine, select
@@ -26,8 +27,10 @@ engine = create_engine(
 )
 
 app = Flask(__name__)
+cors = CORS(app)
 
 @app.route('/get_data', methods=['POST'])
+@cross_origin(supports_credentials=True)
 @swagger_metadata(
     summary='Data endpoint',
     description='This is a sample endpoint'
