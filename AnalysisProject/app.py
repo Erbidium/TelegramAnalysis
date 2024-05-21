@@ -36,8 +36,8 @@ def get_data():
     input_text = request.json.get('text', '')
     print(f'Input text: {input_text}')
 
-    nlp = spacy.load('ru_core_news_md')
-    print("loaded spacy")
+    # nlp = spacy.load('ru_core_news_md')
+    # print("loaded spacy")
 
     processed_input = process_text(input_text)
     if not processed_input:
@@ -56,7 +56,12 @@ def get_data():
 
     print('processed input')
 
-    for post in posts:
+    posts_ordered_by_date = sorted(posts, key=lambda p: p.createdat)
+
+    # find the oldest post
+    oldest_post = None
+    oldest_post_index = None
+    for index, post in enumerate(posts_ordered_by_date):
         processed_post = process_text(post.text)
         if len(processed_post) == 0:
             continue
@@ -64,18 +69,61 @@ def get_data():
         # Compute similarity using Word2Vec
         similarity_result = model.wv.n_similarity(processed_input, processed_post)
 
-        # Convert numpy.float32 to float for JSON serialization
         if similarity_result > 0.5:
+            oldest_post = post
+            oldest_post_index = index
+
             similar_posts.append({
                 "post_id": post.id,
                 "text": post.text,
-                "similarity": float(similarity_result)  # Convert to float
+                "similarity": float(similarity_result),  # Convert to float
+                "created_at": post.createdat,
+                "root_id": None
             })
 
             print(post.text)
+            print('oldest post')
+            break
+
+    if oldest_post_index is None:
+        return jsonify({"error": "Such post is not found"}), 400
+
+    find_spread_by_root(oldest_post, oldest_post_index, posts_ordered_by_date, similar_posts, model)
 
     print(f'Similar posts: {similar_posts}')
     return jsonify(similar_posts)
+
+def find_spread_by_root(root_post, post_index, posts_ordered_by_date, similar_posts, model):
+    processed_post_text = process_text(root_post.text)
+
+    for index, post in enumerate(posts_ordered_by_date):
+        if index <= post_index:
+            continue
+
+        processed_post = process_text(post.text)
+        if len(processed_post) == 0:
+            continue
+
+        # Compute similarity using Word2Vec
+        similarity_result = model.wv.n_similarity(processed_post_text, processed_post)
+
+        # Convert numpy.float32 to float for JSON serialization
+        post_id = post.id
+        if similarity_result > 0.5 and not any(post_id == p['post_id'] for p in similar_posts):
+            similar_posts.append({
+                "post_id": post.id,
+                "text": post.text,
+                "similarity": float(similarity_result),  # Convert to float
+                "created_at": post.createdat,
+                "root_id": root_post.id
+            })
+
+            find_spread_by_root(post, index, posts_ordered_by_date, similar_posts, model)
+
+            print(post.text)
+            print('oldest post')
+
+            break
 
 def process_text(text):
     stop_words = set(nltk.corpus.stopwords.words('russian'))
