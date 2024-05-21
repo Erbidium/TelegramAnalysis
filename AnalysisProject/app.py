@@ -131,8 +131,8 @@ def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordere
         similarity_result = model.wv.n_similarity(processed_post_text, processed_post)
 
         print(f'similarity: {similarity_result}')
-        print(processed_post_text)
-        print(processed_post)
+        # print(processed_post_text)
+        # print(processed_post)
 
         # Convert numpy.float32 to float for JSON serialization
         post_id = post.id
