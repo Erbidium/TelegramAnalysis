@@ -3,5 +3,5 @@ export interface SpreadGraphItem {
     text: string;
     similarity: number;
     created_at: number;
-    root_id: number;
+    root_id?: number;
 }

@@ -38,13 +38,20 @@ export class AppComponent extends BaseComponent implements OnInit {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    createEdges(nodes: SpreadGraphItem[]) {
+    createEdges(nodeItems: SpreadGraphItem[], nodes: {id: string, name: string}[]) {
         const edges = [];
-        if (nodes.length === 2) {
-            return [[0, 1]];
-        }
+
         for (let i = 0; i < nodes.length; i++) {
-            edges.push([this.getRandomInt(0, 10), this.getRandomInt(0, 10)]);
+            const nodeItem = nodeItems[i];
+            const node = nodes[i];
+
+            const parentNodeId = nodeItem.root_id;
+            if (parentNodeId != null) {
+                const parentNodeIndex = nodeItems.findIndex(i => i.post_id == parentNodeId);
+                if (parentNodeIndex >= 0) {
+                    edges.push([+nodes[parentNodeIndex].id, +node.id]);
+                }
+            }
         }
         return edges;
     }
@@ -60,7 +67,7 @@ export class AppComponent extends BaseComponent implements OnInit {
                     console.log(graphItems);
 
                     const nodes = this.createNodes(graphItems);
-                    const edges = this.createEdges(graphItems);
+                    const edges = this.createEdges(graphItems, nodes);
 
                     this.setupGraphVisualization(nodes, edges);
                 },
