@@ -136,6 +136,8 @@ def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordere
 
         # Convert numpy.float32 to float for JSON serialization
         post_id = post.id
+
+        # replace post in graph if similarity is higher
         if similarity_result > 0.5 and not any(post_id == p['post_id'] for p in similar_posts):
             similar_posts.append({
                 "post_id": post.id,
