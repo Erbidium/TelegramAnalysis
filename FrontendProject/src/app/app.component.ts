@@ -1,21 +1,30 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { EChartsOption } from "echarts";
+import { StatisticsService } from "@core/services/statistics.service";
+import { BaseComponent } from "@core/base/base.component";
+import { SpreadGraphItem } from "@core/models/spread-graph-item";
+import { DatePipe, formatDate } from "@angular/common";
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit {
+export class AppComponent extends BaseComponent implements OnInit {
     // @ts-ignore
     options: EChartsOption;
 
-    createNodes(count: number) {
+    constructor(private statisticsService: StatisticsService, @Inject(LOCALE_ID) private locale: string)
+    {
+        super();
+    }
+
+    createNodes(nodeItems: SpreadGraphItem[]) {
         const nodes = [];
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < nodeItems.length; i++) {
             nodes.push({
                 id: i + '',
-                name: 'hello'
+                name: `Схожість: ${Math.round(nodeItems[i].similarity * 10000) / 100}%\n\nСтворено: ${formatDate(nodeItems[i].created_at, 'short', this.locale)}\n\n${nodeItems[i].text.substring(0, 100)}...`
             });
         }
         return nodes;
@@ -29,41 +38,57 @@ export class AppComponent implements OnInit {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    createEdges(count: number) {
+    createEdges(nodes: SpreadGraphItem[]) {
         const edges = [];
-        if (count === 2) {
+        if (nodes.length === 2) {
             return [[0, 1]];
         }
-        for (let i = 0; i < count; i++) {
+        for (let i = 0; i < nodes.length; i++) {
             edges.push([this.getRandomInt(0, 10), this.getRandomInt(0, 10)]);
         }
         return edges;
     }
 
+    private loadSpreadGraph() {
+        const post = "Французские военные уже на Украине. Солдаты французского Иностранного легиона уже развернуты в Славянске, утверждает бывший помощник замминистра обороны США Стивен Брайен в публикации Asia Times. По его словам, передовая группа насчитывает около 100 человек, набранных из 3-го пехотного полка. В их числе - артиллеристы и разведчики. Всего, как говорится в статье, для поддержки ВСУ могут прибыть 1,5 тысячи французских военных. Не стоит недооценивать бойцов Иностранного легиона - это профессиональная хорошо обученная легкая пехота, успевшая повоевать во многих «горячих точках». Вдобавок, до 40 процентов личного состава этого соединения - русскоговорящие выходцы из бывшего СССР. Что-что, а воевать наши люди умели всегда. @sashakots";
+
+        this.statisticsService.getGraph(post)
+            .pipe(this.untilThis)
+            .subscribe(
+                graphItems => {
+                    //this.spinnerService.hide();
+                    console.log(graphItems);
+
+                    const nodes = this.createNodes(graphItems);
+                    const edges = this.createEdges(graphItems);
+
+                    this.setupGraphVisualization(nodes, edges);
+                },
+                error => console.log(error) //this.notifications.showErrorMessage(error),
+            );
+    }
+
     ngOnInit(): void {
-        const datas = [];
+        this.loadSpreadGraph();
+    }
 
-        datas.push({
-            nodes: this.createNodes(10),
-            edges: this.createEdges(10),
-        });
-
+    setupGraphVisualization(nodes: {id: string, name: string}[], edges: number[][])
+    {
         this.options = {
-            series: datas.map((item, idx) => {
-                idx = 8;
-                return {
+            series: [
+                {
                     type: 'graph',
                     layout: 'force',
-                    ribbonType: true,
                     animation: true,
                     animationDuration: 1500,
                     animationEasingUpdate: 'quinticInOut',
                     emphasis: {
                         lineStyle: {
                             width: 10
-                        }
+                        },
+                        focus: 'adjacency'
                     },
-                    data: item.nodes,
+                    data: nodes,
                     width: '100%',
                     height: '100%',
                     lineStyle: {
@@ -81,7 +106,6 @@ export class AppComponent implements OnInit {
                     draggable: true,
                     edgeSymbol: ['circle', 'arrow'],
                     roam: true,
-                    focusNodeAdjacency: true,
                     force: {
                         repulsion: 4000,
                         edgeLength: 70,
@@ -92,14 +116,14 @@ export class AppComponent implements OnInit {
                         position: "right"
                     },
                     labelLine: 'show',
-                    edges: item.edges.map(e => {
+                    edges: edges.map(e => {
                         return {
                             source: e[0] + '',
                             target: e[1] + ''
                         };
                     }),
-                };
-            }),
+                }
+            ]
         };
     }
 }
