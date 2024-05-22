@@ -132,7 +132,20 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                     },
                     label: {
                         show: true,
-                        position: "right"
+                        rich: {
+                            bold: {
+                                fontWeight: 'bold',
+                            },
+                        },
+                        position: "right",
+                        formatter: params => {
+                            const labelText = params.name;
+                            const similarityTextEnd = labelText.indexOf('\n');
+                            const similarityStr = labelText.substring(0, similarityTextEnd);
+                            const afterSimilarityStr = labelText.substring(similarityTextEnd)
+
+                            return `{bold|${similarityStr}}${afterSimilarityStr}`
+                        }
                     },
                     labelLine: 'show',
                     edges: edges.map(e => {
