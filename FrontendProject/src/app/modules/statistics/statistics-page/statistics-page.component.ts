@@ -1,7 +1,6 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { StatisticsService } from "@core/services/statistics.service";
 import { BaseComponent } from "@core/base/base.component";
-import { ParsingStatistics } from "@core/models/parsing-statistics";
 import { ChannelStatistics } from "@core/models/channel-statistics";
 
 @Component({
@@ -13,7 +12,7 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
 
     public parsingStatistics: ChannelStatistics[] = [];
 
-  constructor(private statisticsService: StatisticsService, private changeDetectorRef: ChangeDetectorRef) {
+  constructor(private statisticsService: StatisticsService) {
       super();
   }
 
@@ -34,5 +33,4 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
                 error => console.log(error) //this.notifications.showErrorMessage(error),
             );
     }
-
 }

@@ -4,6 +4,7 @@ import { StatisticsPageComponent } from './statistics-page/statistics-page.compo
 import { StatisticsRoutingModule } from "@modules/statistics/statistics-routing.module";
 import { MaterialModule } from "@shared/material/material.module";
 import { MatCardModule } from "@angular/material/card";
+import { SharedModule } from "@shared/shared.module";
 
 
 
@@ -12,7 +13,7 @@ import { MatCardModule } from "@angular/material/card";
     StatisticsPageComponent
   ],
     imports: [
-        CommonModule, StatisticsRoutingModule, MaterialModule, MatCardModule
+        CommonModule, StatisticsRoutingModule, MaterialModule, MatCardModule, SharedModule
     ]
 })
 export class StatisticsModule { }

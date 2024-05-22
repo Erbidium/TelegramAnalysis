@@ -1,0 +1,19 @@
+<app-header>
+</app-header>
+<app-back-button></app-back-button>
+<h1>Аналіз розповсюдження посту</h1>
+<mat-card>
+    <mat-card-content>
+        <form [formGroup]="searchForm">
+            <div class="form-inputs">
+                <mat-label>Текст посту</mat-label>
+                <mat-form-field appearance="outline">
+                    <input matInput id="text" type="text" formControlName="postText" placeholder="Введіть текст посту" />
+                </mat-form-field>
+            </div>
+
+            <button mat-raised-button type="button" (click)="loadSpreadGraph()">Побудувати граф розповсюдження</button>
+        </form>
+    </mat-card-content>
+</mat-card>
+<div echarts [options]="options" style="height: 900px"></div>

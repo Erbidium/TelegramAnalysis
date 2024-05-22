@@ -39,8 +39,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(TestProfile)));
 
-builder.Configuration.AddJsonFile("ChannelsConfig.json");
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

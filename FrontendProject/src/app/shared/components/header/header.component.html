@@ -1,0 +1,15 @@
+<mat-toolbar color="primary">
+    <span>{{title}}</span>
+    <nav mat-tab-nav-bar>
+        <a
+            mat-tab-link
+            class="link-btn"
+            *ngFor="let link of navLinks"
+            [routerLink]="link.path"
+            routerLinkActive
+            #rla="routerLinkActive"
+            [active]="rla.isActive">
+            {{ link.label }}
+        </a>
+    </nav>
+</mat-toolbar>

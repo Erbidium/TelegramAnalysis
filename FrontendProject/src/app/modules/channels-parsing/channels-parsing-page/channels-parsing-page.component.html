@@ -1,0 +1,14 @@
+<app-header>
+</app-header>
+<app-back-button></app-back-button>
+<h1>Парсинг Telegram каналів</h1>
+<button mat-button><h2>Виконати парсинг</h2></button>
+<mat-card *ngFor="let channel of channels">
+    <mat-card-header>
+        <mat-card-title>{{channel.title}}</mat-card-title>
+        <mat-card-subtitle>Учасників: {{channel.participantsCount}}</mat-card-subtitle>
+        <mat-card-actions style="margin-left: 100px;">
+            <mat-icon (click)="deleteChannel(channel.id)">delete</mat-icon>
+        </mat-card-actions>
+    </mat-card-header>
+</mat-card>

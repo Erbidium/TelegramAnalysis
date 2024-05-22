@@ -4,6 +4,7 @@ import { ParsingStatistics } from "@core/models/parsing-statistics";
 import { Observable } from "rxjs";
 import { ChannelStatistics } from "@core/models/channel-statistics";
 import { SpreadGraphItem } from "@core/models/spread-graph-item";
+import { Channel } from "@core/models/channel";
 
 @Injectable({
     providedIn: 'root',
@@ -22,5 +23,9 @@ export class StatisticsService {
         return this.httpService.postRequest<SpreadGraphItem[]>('http://127.0.0.1:5000/get_data', {
             text: postText
         });
+    }
+
+    public getChannelsToParse(): Observable<Channel[]> {
+        return this.httpService.getRequest<Channel[]>(`/Channels/channels-to-parse`);
     }
 }
