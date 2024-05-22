@@ -6,6 +6,7 @@ import { EChartsOption } from "echarts";
 import { StatisticsService } from "@core/services/statistics.service";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { NotificationService } from "@core/services/notification.service";
+import { SpinnerOverlayService } from "@core/services/spinner-overlay.service";
 
 @Component({
   selector: 'app-distribution-analysis-page',
@@ -34,7 +35,8 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
     constructor(
         private statisticsService: StatisticsService,
         @Inject(LOCALE_ID) private locale: string,
-        private notifications: NotificationService
+        private notifications: NotificationService,
+        private spinnerService: SpinnerOverlayService,
     )
     {
         super();
@@ -43,11 +45,12 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
     loadSpreadGraph() {
         const post = this.searchForm.value.postText!;
 
+        this.spinnerService.show();
         this.statisticsService.getGraph(post)
             .pipe(this.untilThis)
             .subscribe(
                 graphItems => {
-                    //this.spinnerService.hide();
+                    this.spinnerService.hide();
                     console.log(graphItems);
 
                     const nodes = this.createNodes(graphItems);
@@ -56,6 +59,8 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                     this.setupGraphVisualization(nodes, edges);
                 },
                 error => {
+                    this.spinnerService.hide();
+
                     //this.notifications.showErrorMessage(error);
                     this.notifications.showWarningMessage('Сталася помилка! Ваше повідомлення не знайдено серед повідомлень, які були отримані в результаті парсингу')
                 }

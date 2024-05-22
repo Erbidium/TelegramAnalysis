@@ -7,13 +7,17 @@ import { MatIconModule } from "@angular/material/icon";
 import { HeaderComponent } from './components/header/header.component';
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatToolbarModule } from "@angular/material/toolbar";
+import { SpinnerComponent } from './components/spinner/spinner.component';
+import { SpinnerOverlayComponent } from './components/spinner-overlay/spinner-overlay.component';
 
 
 
 @NgModule({
     declarations: [
     BackButtonComponent,
-    HeaderComponent
+    HeaderComponent,
+    SpinnerComponent,
+    SpinnerOverlayComponent
   ],
     imports: [
         CommonModule,
