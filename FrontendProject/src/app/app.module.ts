@@ -6,10 +6,11 @@ import { RouterOutlet } from "@angular/router";
 import { AppRoutingModule } from "./app-routing.module";
 import { SharedModule } from "@shared/shared.module";
 import { CoreModule } from "@core/core.module";
+import { MaterialModule } from "@shared/material/material.module";
 
 @NgModule({
     declarations: [AppComponent],
-    imports: [BrowserModule, BrowserAnimationsModule, RouterOutlet, AppRoutingModule, SharedModule, CoreModule],
+    imports: [BrowserModule, BrowserAnimationsModule, RouterOutlet, AppRoutingModule, SharedModule, CoreModule, MaterialModule],
     providers: [],
     bootstrap: [AppComponent],
 })

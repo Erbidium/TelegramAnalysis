@@ -19,7 +19,7 @@ import { MatButtonModule } from "@angular/material/button";
         DistributionAnalysisPageComponent
     ],
     imports: [
-        CommonModule, DistributionAnalysisRoutingModule, MaterialModule, MatCardModule,
+        CommonModule, DistributionAnalysisRoutingModule, MaterialModule,
         NgxEchartsModule.forRoot({
             /**
              * This will import all modules from echarts.
@@ -27,7 +27,7 @@ import { MatButtonModule } from "@angular/material/button";
              * please refer to [Custom Build] section.
              */
             echarts: () => import('echarts'), // or import('./path-to-my-custom-echarts')
-        }), SharedModule, MatInputModule, ReactiveFormsModule, MatButtonModule
+        }), SharedModule, ReactiveFormsModule
     ]
 })
 export class DistributionAnalysisModule { }

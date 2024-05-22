@@ -6,6 +6,7 @@ import { SharedModule } from "@shared/shared.module";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
 import { MatIconModule } from "@angular/material/icon";
+import { MaterialModule } from "@shared/material/material.module";
 
 
 
@@ -14,7 +15,7 @@ import { MatIconModule } from "@angular/material/icon";
     ChannelsParsingPageComponent
   ],
     imports: [
-        CommonModule, ChannelsParsingRoutingModule, SharedModule, MatButtonModule, MatCardModule, MatIconModule
+        CommonModule, ChannelsParsingRoutingModule, SharedModule, MaterialModule
     ]
 })
 export class ChannelsParsingModule { }

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { StatisticsService } from "@core/services/statistics.service";
 import { BaseComponent } from "@core/base/base.component";
 import { ChannelStatistics } from "@core/models/channel-statistics";
+import { NotificationService } from "@core/services/notification.service";
 
 @Component({
   selector: 'app-statistics-page',
@@ -12,7 +13,7 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
 
     public parsingStatistics: ChannelStatistics[] = [];
 
-  constructor(private statisticsService: StatisticsService) {
+  constructor(private statisticsService: StatisticsService, private notifications: NotificationService) {
       super();
   }
 
@@ -30,7 +31,7 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
                     console.log(parsingStatistics.channelsStatistics)
                     console.log(this.parsingStatistics);
                 },
-                error => console.log(error) //this.notifications.showErrorMessage(error),
+                error => this.notifications.showErrorMessage(error),
             );
     }
 }

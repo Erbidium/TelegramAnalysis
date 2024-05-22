@@ -13,7 +13,7 @@ import { SharedModule } from "@shared/shared.module";
     StatisticsPageComponent
   ],
     imports: [
-        CommonModule, StatisticsRoutingModule, MaterialModule, MatCardModule, SharedModule
+        CommonModule, StatisticsRoutingModule, MaterialModule, SharedModule
     ]
 })
 export class StatisticsModule { }

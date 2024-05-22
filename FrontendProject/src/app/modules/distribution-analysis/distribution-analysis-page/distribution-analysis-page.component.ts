@@ -5,6 +5,7 @@ import { BaseComponent } from "@core/base/base.component";
 import { EChartsOption } from "echarts";
 import { StatisticsService } from "@core/services/statistics.service";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
+import { NotificationService } from "@core/services/notification.service";
 
 @Component({
   selector: 'app-distribution-analysis-page',
@@ -30,7 +31,11 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
         },
     );
 
-    constructor(private statisticsService: StatisticsService, @Inject(LOCALE_ID) private locale: string)
+    constructor(
+        private statisticsService: StatisticsService,
+        @Inject(LOCALE_ID) private locale: string,
+        private notifications: NotificationService
+    )
     {
         super();
     }
@@ -51,9 +56,9 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                     this.setupGraphVisualization(nodes, edges);
                 },
                 error => {
-                    console.log(error);
-                    alert('Сталася помилка! Ваше повідомлення не знайдено серед повідомлень, які були отримані в результаті парсингу');
-                } //this.notifications.showErrorMessage(error),
+                    //this.notifications.showErrorMessage(error);
+                    this.notifications.showWarningMessage('Сталася помилка! Ваше повідомлення не знайдено серед повідомлень, які були отримані в результаті парсингу')
+                }
             );
     }
 
