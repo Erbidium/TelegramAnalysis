@@ -11,7 +11,7 @@ import { headerNavLinks } from '@core/helpers/header-helpers';
 export class HeaderComponent extends BaseComponent {
     @Input() navLinks = headerNavLinks;
 
-    @Input() title = 'Telegram distribution analysis';
+    @Input() title = 'Аналіз розповсюдження Telegram постів';
 
     constructor(
         private router: Router,
