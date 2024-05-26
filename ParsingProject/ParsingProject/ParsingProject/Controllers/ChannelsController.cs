@@ -31,7 +31,7 @@ public class ChannelsController : ControllerBase
     [HttpGet("channels-to-parse")]
     public ActionResult<List<DAL.Entities.Channel>> GetChannelsToParse()
     {
-        return _dataContext.Channels.ToList();
+        return _dataContext.Channels.Where(c => !c.IsDeleted).ToList();
     }
     
     [HttpPost("save-channel")]
@@ -60,15 +60,21 @@ public class ChannelsController : ControllerBase
             await client.Channels_JoinChannel(channel);
         }
 
-        if (_dataContext.Channels.FirstOrDefault(c => c.TelegramId == chatId) is null)
+        var ch = _dataContext.Channels.FirstOrDefault(c => c.TelegramId == chatId);
+        if (ch is null)
         {
             await _repository.SaveChannelAsync(channel);
+        }
+        else
+        {
+            ch.IsDeleted = false;
+            await _dataContext.SaveChangesAsync();
         }
 
         return Ok();
     }
     
-    [HttpPost("delete-channel")]
+    [HttpDelete("delete-channel/{id:long}")]
     public async Task<IActionResult> DeleteChannel(long id)
     {
         var channel = await _dataContext.Channels.FindAsync(id);
@@ -76,6 +82,8 @@ public class ChannelsController : ControllerBase
             return BadRequest();
 
         channel.IsDeleted = true;
+        await _dataContext.SaveChangesAsync();
+        
         return Ok();
     }
 }

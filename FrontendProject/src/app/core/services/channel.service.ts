@@ -15,4 +15,8 @@ export class ChannelService {
     public getChannelsToParse(): Observable<Channel[]> {
         return this.httpService.getRequest<Channel[]>(`${this.routePrefix}/channels-to-parse`);
     }
+
+    public deleteChannel(id: number) {
+        return this.httpService.deleteRequest(`${this.routePrefix}/delete-channel/${id}`);
+    }
 }

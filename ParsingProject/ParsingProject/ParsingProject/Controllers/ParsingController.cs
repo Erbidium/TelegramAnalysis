@@ -57,7 +57,10 @@ public class ParsingController : ControllerBase
     {
         return new ParsingStatisticsModel
         {
-            ChannelsStatistics = _dataContext.Channels.ToList().Select(c =>
+            ChannelsStatistics = _dataContext.Channels
+                .Where(c => !c.IsDeleted)
+                .ToList()
+                .Select(c =>
                 {
                     var channelPosts = _dataContext.Posts.Where(p => p.ChannelId == c.Id);
                     

@@ -4,6 +4,7 @@ import { Channel } from '@core/models/channel';
 import { NotificationService } from '@core/services/notification.service';
 import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { ChannelService } from "@core/services/channel.service";
+import { switchMap } from "rxjs";
 
 @Component({
     selector: 'app-channels-parsing-page',
@@ -31,12 +32,10 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
             .pipe(this.untilThis)
             .subscribe(
                 channels => {
-                    this.channels = [...this.channels.concat(channels)];
+                    this.channels = channels;
                     this.spinnerService.hide();
-                    console.log(this.channels);
                 },
                 error => {
-                    console.log(error);
                     this.notifications.showErrorMessage(error);
                     this.spinnerService.hide();
                 },
@@ -44,6 +43,21 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
     }
 
     deleteChannel(channelId: number) {
-        console.log(channelId);
+        this.spinnerService.show();
+        this.channelService
+            .deleteChannel(channelId)
+            .pipe(switchMap(() => this.channelService.getChannelsToParse()))
+            .pipe(this.untilThis)
+            .subscribe({
+                next: (channels) => {
+                    this.channels = channels;
+                    this.notifications.showSuccessMessage('Канал успішно видалено зі списку');
+                    this.spinnerService.hide()
+                },
+                error: () => {
+                    this.notifications.showErrorMessage('Трапилася помилка');
+                    this.spinnerService.hide();
+                }
+            });
     }
 }

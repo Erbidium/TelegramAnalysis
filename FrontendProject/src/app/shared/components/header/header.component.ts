@@ -1,5 +1,4 @@
 import { Component, Input } from '@angular/core';
-import { Router } from '@angular/router';
 import { BaseComponent } from '@core/base/base.component';
 import { headerNavLinks } from '@core/helpers/header-helpers';
 
@@ -12,10 +11,4 @@ export class HeaderComponent extends BaseComponent {
     @Input() navLinks = headerNavLinks;
 
     @Input() title = 'Аналіз розповсюдження Telegram постів';
-
-    constructor(
-        private router: Router,
-    ) {
-        super();
-    }
 }
