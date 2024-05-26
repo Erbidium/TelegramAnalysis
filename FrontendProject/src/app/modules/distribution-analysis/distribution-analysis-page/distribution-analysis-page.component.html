@@ -9,10 +9,11 @@
                 <mat-label>Текст посту</mat-label>
                 <mat-form-field appearance="outline">
                     <input matInput id="text" type="text" formControlName="postText" placeholder="Введіть текст посту" />
+                    <mat-error *ngIf="searchForm.controls['postText'].hasError('required')">Текст посту обов'язковий</mat-error>
                 </mat-form-field>
             </div>
 
-            <button mat-raised-button type="button" (click)="loadSpreadGraph()">Побудувати граф розповсюдження</button>
+            <button mat-raised-button type="button" (click)="loadSpreadGraph()"  [disabled]="!searchForm.valid">Побудувати граф розповсюдження</button>
         </form>
     </mat-card-content>
 </mat-card>
