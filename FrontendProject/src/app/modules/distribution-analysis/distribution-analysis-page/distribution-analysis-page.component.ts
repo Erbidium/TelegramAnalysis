@@ -1,20 +1,19 @@
-import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
-import { SpreadGraphItem } from "@core/models/spread-graph-item";
-import { formatDate } from "@angular/common";
-import { BaseComponent } from "@core/base/base.component";
-import { EChartsOption } from "echarts";
-import { StatisticsService } from "@core/services/statistics.service";
-import { FormControl, FormGroup, Validators } from "@angular/forms";
-import { NotificationService } from "@core/services/notification.service";
-import { SpinnerOverlayService } from "@core/services/spinner-overlay.service";
+import { formatDate } from '@angular/common';
+import { Component, Inject, LOCALE_ID } from '@angular/core';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { BaseComponent } from '@core/base/base.component';
+import { SpreadGraphItem } from '@core/models/spread-graph-item';
+import { NotificationService } from '@core/services/notification.service';
+import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
+import { EChartsOption } from 'echarts';
+import { DistributionAnalysisService } from "@core/services/distribution-analysis.service";
 
 @Component({
-  selector: 'app-distribution-analysis-page',
-  templateUrl: './distribution-analysis-page.component.html',
-  styleUrls: ['./distribution-analysis-page.component.sass']
+    selector: 'app-distribution-analysis-page',
+    templateUrl: './distribution-analysis-page.component.html',
+    styleUrls: ['./distribution-analysis-page.component.sass'],
 })
 export class DistributionAnalysisPageComponent extends BaseComponent {
-
     // @ts-ignore
     options: EChartsOption;
 
@@ -23,7 +22,7 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
             postText: new FormControl(
                 '',
                 [
-                    Validators.required
+                    Validators.required,
                 ],
             ),
         },
@@ -33,12 +32,11 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
     );
 
     constructor(
-        private statisticsService: StatisticsService,
+        private analysisService: DistributionAnalysisService,
         @Inject(LOCALE_ID) private locale: string,
         private notifications: NotificationService,
         private spinnerService: SpinnerOverlayService,
-    )
-    {
+    ) {
         super();
     }
 
@@ -46,7 +44,7 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
         const post = this.searchForm.value.postText!;
 
         this.spinnerService.show();
-        this.statisticsService.getGraph(post)
+        this.analysisService.getPostDistributionGraph(post)
             .pipe(this.untilThis)
             .subscribe(
                 graphItems => {
@@ -61,13 +59,14 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                 error => {
                     this.spinnerService.hide();
 
-                    //this.notifications.showErrorMessage(error);
-                    this.notifications.showWarningMessage('Сталася помилка! Ваше повідомлення не знайдено серед повідомлень, які були отримані в результаті парсингу')
-                }
+                    console.log(error);
+                    this.notifications.showWarningMessage(`Сталася помилка!
+                    Ваше повідомлення не знайдено серед повідомлень, які були отримані в результаті парсингу`);
+                },
             );
     }
 
-    createEdges(nodeItems: SpreadGraphItem[], nodes: {id: string, name: string}[]) {
+    createEdges(nodeItems: SpreadGraphItem[], nodes: { id: string, name: string }[]) {
         const edges = [];
 
         for (let i = 0; i < nodes.length; i++) {
@@ -75,29 +74,35 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
             const node = nodes[i];
 
             const parentNodeId = nodeItem.root_id;
+
             if (parentNodeId != null) {
-                const parentNodeIndex = nodeItems.findIndex(i => i.post_id == parentNodeId);
+                const parentNodeIndex = nodeItems.findIndex(n => n.post_id === parentNodeId);
+
                 if (parentNodeIndex >= 0) {
                     edges.push([+nodes[parentNodeIndex].id, +node.id]);
                 }
             }
         }
+
         return edges;
     }
 
     createNodes(nodeItems: SpreadGraphItem[]) {
         const nodes = [];
+
         for (let i = 0; i < nodeItems.length; i++) {
             nodes.push({
-                id: i + '',
-                name: `Схожість: ${Math.round(nodeItems[i].similarity * 10000) / 100}%\n\nСтворено: ${formatDate(nodeItems[i].created_at, 'short', this.locale)}\n\nКанал: ${nodeItems[i].channel_title}\n\n${nodeItems[i].text.substring(0, 100)}...`
+                id: `${i}`,
+                name: `Схожість: ${Math.round(nodeItems[i].similarity * 10000) / 100}%\n\n
+                Створено: ${formatDate(nodeItems[i].created_at, 'short', this.locale)}\n\n
+                Канал: ${nodeItems[i].channel_title}\n\n${nodeItems[i].text.substring(0, 100)}...`,
             });
         }
+
         return nodes;
     }
 
-    setupGraphVisualization(nodes: {id: string, name: string}[], edges: number[][])
-    {
+    setupGraphVisualization(nodes: { id: string, name: string }[], edges: number[][]) {
         this.options = {
             series: [
                 {
@@ -108,9 +113,9 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                     animationEasingUpdate: 'quinticInOut',
                     emphasis: {
                         lineStyle: {
-                            width: 10
+                            width: 10,
                         },
-                        focus: 'adjacency'
+                        focus: 'adjacency',
                     },
                     data: nodes,
                     width: '100%',
@@ -124,7 +129,7 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                         borderColor: '#fff',
                         borderWidth: 1,
                         shadowBlur: 10,
-                        shadowColor: 'rgba(0, 0, 0, 0.3)'
+                        shadowColor: 'rgba(0, 0, 0, 0.3)',
                     },
                     symbolSize: 60,
                     draggable: true,
@@ -133,7 +138,7 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                     force: {
                         repulsion: 4000,
                         edgeLength: 70,
-                        gravity: 0.2
+                        gravity: 0.2,
                     },
                     label: {
                         show: true,
@@ -142,25 +147,23 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
                                 fontWeight: 'bold',
                             },
                         },
-                        position: "right",
+                        position: 'right',
                         formatter: params => {
                             const labelText = params.name;
                             const similarityTextEnd = labelText.indexOf('\n');
                             const similarityStr = labelText.substring(0, similarityTextEnd);
-                            const afterSimilarityStr = labelText.substring(similarityTextEnd)
+                            const afterSimilarityStr = labelText.substring(similarityTextEnd);
 
-                            return `{bold|${similarityStr}}${afterSimilarityStr}`
-                        }
+                            return `{bold|${similarityStr}}${afterSimilarityStr}`;
+                        },
                     },
                     labelLine: 'show',
-                    edges: edges.map(e => {
-                        return {
-                            source: e[0] + '',
-                            target: e[1] + ''
-                        };
-                    }),
-                }
-            ]
+                    edges: edges.map(e => ({
+                        source: `${e[0]}`,
+                        target: `${e[1]}`,
+                    })),
+                },
+            ],
         };
     }
 }

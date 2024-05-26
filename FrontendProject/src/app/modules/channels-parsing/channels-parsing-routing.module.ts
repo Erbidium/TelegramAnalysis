@@ -1,13 +1,13 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import {
-    ChannelsParsingPageComponent
-} from "@modules/channels-parsing/channels-parsing-page/channels-parsing-page.component";
+    ChannelsParsingPageComponent,
+} from '@modules/channels-parsing/channels-parsing-page/channels-parsing-page.component';
 
 const routes: Routes = [
     {
         path: '',
-        component: ChannelsParsingPageComponent
+        component: ChannelsParsingPageComponent,
     },
 ];
 
