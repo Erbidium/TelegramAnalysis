@@ -33,9 +33,8 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         _dbRepository = dbRepository;
     }
 
-    public async Task ParseChannelsDataAsync(WTelegramService wt, CancellationToken cancellationToken)
+    public async Task ParseChannelsDataAsync(WTelegramService wt, DateTime parseDataUntilDate, CancellationToken cancellationToken)
     {
-        var parseDataUntilDate = new DateTime(2024, 1, 1);
         var messagesCountPerRequest = 100;
 
         bool allChannelsAreParsed = false;

@@ -6,6 +6,7 @@ import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { ChannelService } from "@core/services/channel.service";
 import { switchMap } from "rxjs";
 import { ParsingService } from "@core/services/parsing.service";
+import { FormControl, FormGroup, Validators } from "@angular/forms";
 
 @Component({
     selector: 'app-channels-parsing-page',
@@ -14,6 +15,20 @@ import { ParsingService } from "@core/services/parsing.service";
 })
 export class ChannelsParsingPageComponent extends BaseComponent implements OnInit {
     public channels: Channel[] = [];
+
+    public parsingForm = new FormGroup(
+        {
+            parsingDate: new FormControl(
+                '',
+                [
+                    Validators.required,
+                ],
+            ),
+        },
+        {
+            updateOn: 'blur',
+        },
+    );
 
     constructor(
         private channelService: ChannelService,
@@ -45,8 +60,15 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
     }
 
     parseChannels() {
+        console.log(this.parsingForm.value.parsingDate!)
+        const parsingDate = new Date(this.parsingForm.value.parsingDate!);
+        if (parsingDate > new Date()) {
+            this.notifications.showWarningMessage('Дата повинна бути меншою за поточну');
+            return;
+        }
+
         this.parsingService
-            .parseChannels()
+            .parseChannels(parsingDate)
             .pipe(this.untilThis)
             .subscribe({
                 next: () => this.notifications.showSuccessMessage('Парсинг було повністю виконано та успішно завершено'),

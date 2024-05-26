@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Entities;
 using ParsingProject.DAL.Context;
+using ParsingProject.DTO;
 
 namespace ParsingProject.Controllers;
 
@@ -33,9 +34,9 @@ public class ParsingController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> ParseChannels(CancellationToken cancellationToken)
+    public async Task<IActionResult> ParseChannels([FromBody]ChannelsParsingDto channelsParsing, CancellationToken cancellationToken)
     {
-        await _channelParsingService.ParseChannelsDataAsync(WT, cancellationToken);
+        await _channelParsingService.ParseChannelsDataAsync(WT, channelsParsing.ParsingDate, cancellationToken);
 
         return Ok();
     }

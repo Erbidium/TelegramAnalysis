@@ -2,7 +2,7 @@
 
 public interface IChannelParsingService
 {
-    Task ParseChannelsDataAsync(WTelegramService wt, CancellationToken cancellationToken);
+    Task ParseChannelsDataAsync(WTelegramService wt, DateTime parsingDate, CancellationToken cancellationToken);
 
     Task UpdateChannelsDataAsync(WTelegramService wt);
 }

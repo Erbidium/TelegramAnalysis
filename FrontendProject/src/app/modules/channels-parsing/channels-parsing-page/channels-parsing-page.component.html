@@ -2,7 +2,20 @@
 </app-header>
 <app-back-button></app-back-button>
 <h1>Парсинг Telegram каналів</h1>
-<button mat-stroked-button (click)="parseChannels()">Виконати парсинг</button>
+<form [formGroup]="parsingForm">
+    <div class="form-inputs">
+        <mat-label>Дата, до якої стягуються пости</mat-label>
+        <mat-form-field>
+            <mat-label>Оберіть дату</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="parsingDate">
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="parsingForm.controls['parsingDate'].hasError('required')">Дата обов'язкова</mat-error>
+        </mat-form-field>
+    </div>
+    <button mat-raised-button type="button" (click)="parseChannels()"  [disabled]="!parsingForm.valid">Виконати парсинг</button>
+</form>
 <h4>Примітка: не закривайте сторінку після початку виконання парсингу, оскільки процес було перевано</h4>
 <mat-card *ngFor="let channel of channels">
     <mat-card-header>

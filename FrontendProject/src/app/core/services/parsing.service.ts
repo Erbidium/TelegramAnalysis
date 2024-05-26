@@ -10,7 +10,9 @@ export class ParsingService {
     // eslint-disable-next-line no-empty-function
     constructor(private httpService: HttpInternalService) {}
 
-    public parseChannels() {
-        return this.httpService.postRequest(`${this.routePrefix}`, {});
+    public parseChannels(parsingDate: Date) {
+        return this.httpService.postRequest(`${this.routePrefix}`, {
+            parsingDate: parsingDate
+        });
     }
 }
