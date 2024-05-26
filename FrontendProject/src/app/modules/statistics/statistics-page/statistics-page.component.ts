@@ -35,7 +35,10 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
                     this.parsingStatistics = [...this.parsingStatistics.concat(parsingStatistics.channelsStatistics)];
                     this.spinnerService.hide();
                 },
-                error => this.notifications.showErrorMessage(error),
+                error => {
+                    this.notifications.showErrorMessage('Трапилася помилка');
+                    console.log(error);
+                },
             );
     }
 }

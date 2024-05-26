@@ -2,7 +2,8 @@
 </app-header>
 <app-back-button></app-back-button>
 <h1>Парсинг Telegram каналів</h1>
-<button mat-stroked-button>Виконати парсинг</button>
+<button mat-stroked-button (click)="parseChannels()">Виконати парсинг</button>
+<h4>Примітка: не закривайте сторінку після початку виконання парсингу, оскільки процес було перевано</h4>
 <mat-card *ngFor="let channel of channels">
     <mat-card-header>
         <mat-card-title>{{channel.title}}</mat-card-title>

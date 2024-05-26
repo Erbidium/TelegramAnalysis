@@ -33,7 +33,7 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         _dbRepository = dbRepository;
     }
 
-    public async Task ParseChannelsDataAsync(WTelegramService wt)
+    public async Task ParseChannelsDataAsync(WTelegramService wt, CancellationToken cancellationToken)
     {
         var parseDataUntilDate = new DateTime(2024, 1, 1);
         var messagesCountPerRequest = 100;
@@ -44,11 +44,12 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         
         //if (wt.User == null) throw new Exception("Complete the login first");
         
-        var myself = await client.LoginUserIfNeeded();
-        Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
+        //var myself = await client.LoginUserIfNeeded();
+        //Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
-        while (!allChannelsAreParsed)
+        while (!allChannelsAreParsed && !cancellationToken.IsCancellationRequested)
         {
+            /*
             allChannelsAreParsed = true;
             
             var channels = _context.Channels.ToList();
@@ -56,7 +57,7 @@ public class ChannelParsingService : BaseService, IChannelParsingService
             await RandomDelay.Wait(1000, 1500);
             var chats = await client.Messages_GetAllChats();
             await RandomDelay.Wait();
-
+            
             foreach (var ch in channels)
             {
                 var chat = chats.chats[ch.TelegramId];
@@ -86,7 +87,10 @@ public class ChannelParsingService : BaseService, IChannelParsingService
                 
                 await RandomDelay.Wait();
             }
+            */
         }
+        
+        Console.WriteLine("Ended parsing");
     }
     
     public async Task UpdateChannelsDataAsync(WTelegramService wt)

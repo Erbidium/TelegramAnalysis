@@ -32,10 +32,10 @@ public class ParsingController : ControllerBase
         _dataContext = dataContext;
     }
 
-    [HttpPost(Name = "parse-channels")]
-    public async Task<IActionResult> ParseChannels()
+    [HttpPost]
+    public async Task<IActionResult> ParseChannels(CancellationToken cancellationToken)
     {
-        await _channelParsingService.ParseChannelsDataAsync(WT);
+        await _channelParsingService.ParseChannelsDataAsync(WT, cancellationToken);
 
         return Ok();
     }

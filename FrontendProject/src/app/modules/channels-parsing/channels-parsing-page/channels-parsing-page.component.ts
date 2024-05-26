@@ -5,6 +5,7 @@ import { NotificationService } from '@core/services/notification.service';
 import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { ChannelService } from "@core/services/channel.service";
 import { switchMap } from "rxjs";
+import { ParsingService } from "@core/services/parsing.service";
 
 @Component({
     selector: 'app-channels-parsing-page',
@@ -16,6 +17,7 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
 
     constructor(
         private channelService: ChannelService,
+        private parsingService: ParsingService,
         private spinnerService: SpinnerOverlayService,
         private notifications: NotificationService,
     ) {
@@ -42,6 +44,16 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
             );
     }
 
+    parseChannels() {
+        this.parsingService
+            .parseChannels()
+            .pipe(this.untilThis)
+            .subscribe({
+                next: () => this.notifications.showSuccessMessage('Парсинг було повністю виконано та успішно завершено'),
+                error: () => this.notifications.showErrorMessage('Трапилася помилка. Парсинг було перевано')
+            });
+    }
+
     deleteChannel(channelId: number) {
         this.spinnerService.show();
         this.channelService
@@ -54,8 +66,9 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
                     this.notifications.showSuccessMessage('Канал успішно видалено зі списку');
                     this.spinnerService.hide()
                 },
-                error: () => {
+                error: (error) => {
                     this.notifications.showErrorMessage('Трапилася помилка');
+                    console.log(error);
                     this.spinnerService.hide();
                 }
             });
