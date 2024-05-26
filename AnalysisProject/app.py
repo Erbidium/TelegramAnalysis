@@ -94,7 +94,8 @@ def get_data():
             similar_posts.append({
                 "post_id": post.id,
                 "text": post.text,
-                "similarity": float(similarity_result),  # Convert to float
+                "similarity": float(similarity_result),
+                "similarity_with_wanted": float(similarity_result),
                 "created_at": post.createdat,
                 "root_id": None,
                 "channel_title": channel.title
@@ -105,12 +106,12 @@ def get_data():
     if oldest_post_index is None:
         return jsonify({"error": "Such post is not found"}), 400
 
-    find_spread_by_root(oldest_post, oldest_post_index, oldest_post_processed, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, 0, channels)
+    find_spread_by_root(oldest_post, oldest_post_index, oldest_post_processed, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, 0, channels, processed_input)
 
     print(f'Similar posts: {similar_posts}')
     return jsonify(similar_posts)
 
-def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, depth, channels):
+def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, depth, channels, processed_input):
     for index, post in enumerate(posts_ordered_by_date):
         if index <= post_index:
             continue
@@ -129,16 +130,19 @@ def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordere
 
         # replace post in graph if similarity is higher
         if similarity_result > 0.5 and not any(post_id == p['post_id'] for p in similar_posts):
+            similarity_result_with_wanted = model.wv.n_similarity(processed_input, processed_post)
+
             similar_posts.append({
                 "post_id": post.id,
                 "text": post.text,
-                "similarity": float(similarity_result),  # Convert to float
+                "similarity": float(similarity_result),
+                "similarity_with_wanted": float(similarity_result_with_wanted),
                 "created_at": post.createdat,
                 "root_id": root_post.id,
                 "channel_title": channel.title
             })
 
-            find_spread_by_root(post, index, processed_post, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, depth + 1, channels)
+            find_spread_by_root(post, index, processed_post, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, depth + 1, channels, processed_input)
             break
 
 def process_text(post, text, nlp):

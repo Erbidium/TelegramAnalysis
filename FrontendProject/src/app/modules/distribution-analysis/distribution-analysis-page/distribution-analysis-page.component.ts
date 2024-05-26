@@ -93,7 +93,7 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
         for (let i = 0; i < nodeItems.length; i++) {
             nodes.push({
                 id: `${i}`,
-                name: `Схожість: ${Math.round(nodeItems[i].similarity * 10000) / 100}%\n\n
+                name: `Схожість: ${Math.round(nodeItems[i].similarity_with_wanted * 10000) / 100}%\n\n
                 Створено: ${formatDate(nodeItems[i].created_at, 'short', this.locale)}\n\n
                 Канал: ${nodeItems[i].channel_title}\n\n${nodeItems[i].text.substring(0, 100)}...`,
             });
