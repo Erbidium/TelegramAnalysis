@@ -4,7 +4,6 @@ from flask_cors import cross_origin, CORS
 from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
 from sqlalchemy import create_engine, select
-
 from channel import Channel
 from post import Post
 from swagger_gen.lib.wrappers import swagger_metadata
@@ -15,7 +14,6 @@ import pymorphy2
 import spacy
 
 
-# Download stopwords
 nltk.download('punkt')
 nltk.download('stopwords')
 
@@ -81,7 +79,6 @@ def get_data():
         if len(processed_post) == 0:
             continue
 
-        # Compute similarity using Word2Vec
         similarity_result = model.wv.n_similarity(processed_input, processed_post)
 
         if similarity_result > 0.5:
@@ -120,16 +117,22 @@ def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordere
         if len(processed_post) == 0:
             continue
 
-        # Compute similarity using Word2Vec
         similarity_result = model.wv.n_similarity(processed_post_text, processed_post)
 
-        # Convert numpy.float32 to float for JSON serialization
         post_id = post.id
 
         channel = next((channel for channel in channels if channel.id == post.channelid), None)
 
         # replace post in graph if similarity is higher
-        if similarity_result > 0.5 and not any(post_id == p['post_id'] for p in similar_posts):
+        post_search_result_in_graph = [p for p in similar_posts if post_id == p['post_id']]
+        given_post_in_graph = post_search_result_in_graph[0] if post_search_result_in_graph else None
+
+        if similarity_result > 0.5:
+            if given_post_in_graph and given_post_in_graph.similarity >= similarity_result:
+                continue
+            elif given_post_in_graph and given_post_in_graph.similarity < similarity_result:
+                similar_posts = [p for p in similar_posts if p['post_id'] != post_id]
+
             similarity_result_with_wanted = model.wv.n_similarity(processed_input, processed_post)
 
             similar_posts.append({
