@@ -57,7 +57,7 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ParsingPro
     public ParsingProjectContext CreateDbContext(string[] args)
     {
         IConfigurationRoot configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(@Directory.GetCurrentDirectory() + "/../ParsingProject/appsettings.json")
+            .AddJsonFile(Directory.GetCurrentDirectory() + "/../ParsingProject/appsettings.json")
             .Build();
         var builder = new DbContextOptionsBuilder<ParsingProjectContext>();
         var connectionString = configuration.GetConnectionString("DefaultConnection");

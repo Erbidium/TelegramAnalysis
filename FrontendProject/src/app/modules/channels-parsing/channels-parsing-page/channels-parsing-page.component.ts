@@ -67,6 +67,8 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
             return;
         }
 
+        this.notifications.showSuccessMessage('Парсинг було успішно розпочато');
+
         this.parsingService
             .parseChannels(parsingDate)
             .pipe(this.untilThis)
