@@ -16,7 +16,20 @@
     </div>
     <button mat-raised-button type="button" (click)="parseChannels()"  [disabled]="!parsingForm.valid">Виконати парсинг</button>
 </form>
-<h4>Примітка: не закривайте сторінку після початку виконання парсингу, оскільки процес було перевано</h4>
+<h4>Примітка: не закривайте сторінку після початку виконання парсингу, оскільки процес буде перевано</h4>
+<h2 class="channel-form-label">Збереження каналу для парсингу</h2>
+<form [formGroup]="saveChannelForm">
+    <div class="form-inputs">
+        <mat-label>Посилання на канал</mat-label>
+        <mat-form-field appearance="outline">
+            <input matInput id="text" type="text" formControlName="channelLink" placeholder="Введіть посилання" />
+            <mat-error *ngIf="saveChannelForm.controls['channelLink'].hasError('required')">Посилання обов'язкове</mat-error>
+            <mat-error *ngIf="saveChannelForm.controls['channelLink'].hasError('pattern')">Дане посилання не є валідним посиланням на телеграм канал</mat-error>
+
+        </mat-form-field>
+    </div>
+    <button mat-raised-button type="button" (click)="saveChannel()"  [disabled]="!saveChannelForm.valid">Зберегти канал</button>
+</form>
 <mat-card *ngFor="let channel of channels">
     <mat-card-header>
         <mat-card-title>{{channel.title}}</mat-card-title>

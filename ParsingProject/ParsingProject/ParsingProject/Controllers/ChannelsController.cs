@@ -2,6 +2,7 @@
 using ParsingProject.BLL;
 using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;
+using ParsingProject.DTO;
 using TL;
 
 namespace ParsingProject.Controllers;
@@ -35,8 +36,9 @@ public class ChannelsController : ControllerBase
     }
     
     [HttpPost("save-channel")]
-    public async Task<IActionResult> SaveChannel(string link)
+    public async Task<IActionResult> SaveChannel([FromBody] SaveChannelDto saveChannelDto)
     {
+        var link = saveChannelDto.ChannelLink;
         if (!link.StartsWith("https://t.me/"))
             return BadRequest();
 

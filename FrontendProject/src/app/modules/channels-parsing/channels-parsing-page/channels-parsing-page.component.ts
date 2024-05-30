@@ -21,7 +21,22 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
             parsingDate: new FormControl(
                 '',
                 [
+                    Validators.required
+                ],
+            ),
+        },
+        {
+            updateOn: 'blur',
+        },
+    );
+
+    public saveChannelForm = new FormGroup(
+        {
+            channelLink: new FormControl(
+                '',
+                [
                     Validators.required,
+                    Validators.pattern(/^https:\/\/t\.me\/.+$/)
                 ],
             ),
         },
@@ -53,7 +68,8 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
                     this.spinnerService.hide();
                 },
                 error => {
-                    this.notifications.showErrorMessage(error);
+                    console.log(error);
+                    this.notifications.showErrorMessage('Сталася помилка при завантаженні каналів');
                     this.spinnerService.hide();
                 },
             );
@@ -75,6 +91,29 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
             .subscribe({
                 next: () => this.notifications.showSuccessMessage('Парсинг було повністю виконано та успішно завершено'),
                 error: () => this.notifications.showErrorMessage('Трапилася помилка. Парсинг було перевано')
+            });
+    }
+
+    saveChannel() {
+        this.spinnerService.show();
+
+        const channelLink = this.saveChannelForm.value.channelLink!;
+
+        this.channelService
+            .saveChannel(channelLink)
+            .pipe(switchMap(() => this.channelService.getChannelsToParse()))
+            .pipe(this.untilThis)
+            .subscribe({
+                next: (channels) => {
+                    this.channels = channels;
+                    this.notifications.showSuccessMessage('Канал успішно збережено');
+                    this.spinnerService.hide()
+                },
+                error: (error) => {
+                    this.notifications.showErrorMessage('Трапилася помилка');
+                    console.log(error);
+                    this.spinnerService.hide();
+                }
             });
     }
 

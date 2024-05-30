@@ -16,6 +16,12 @@ export class ChannelService {
         return this.httpService.getRequest<Channel[]>(`${this.routePrefix}/channels-to-parse`);
     }
 
+    public saveChannel(channelLink: string) {
+        return this.httpService.postRequest(`${this.routePrefix}/save-channel`, {
+            channelLink
+        });
+    }
+
     public deleteChannel(id: number) {
         return this.httpService.deleteRequest(`${this.routePrefix}/delete-channel/${id}`);
     }
