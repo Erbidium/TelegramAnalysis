@@ -96,10 +96,13 @@ public class DBRepository
     
     public void SaveCommentReaction(ReactionCount reactionCount, long commentId)
     {
+        string commentEmoticon = (reactionCount.reaction as dynamic).emoticon;
+        var reactionId = _context.Reactions.FirstOrDefault(r => r.Emoticon == commentEmoticon)?.Id;
+
         _context.CommentReactions.Add(new CommentReaction
         {
             CommentId = commentId,
-            Emoticon = (reactionCount.reaction as dynamic).emoticon,
+            ReactionId = reactionId,
             Count = reactionCount.count,
             ParsedAt = DateTime.Now
         });

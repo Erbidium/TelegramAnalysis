@@ -8,7 +8,9 @@ public class CommentReaction
     
     public Comment Comment { get; set; } = null!;
 
-    public string Emoticon { get; set; } = string.Empty;
+    public long? ReactionId { get; set; }
+
+    public Reaction? Reaction { get; set; } = null!;
 
     public DateTime ParsedAt { get; set; }
     
