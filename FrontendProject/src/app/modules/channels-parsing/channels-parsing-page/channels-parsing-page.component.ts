@@ -83,6 +83,11 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
             return;
         }
 
+        if (this.channels.length === 0) {
+            this.notifications.showWarningMessage('Список каналів для парсингу порожній! Додайте хоча б 1 канал')
+            return;
+        }
+
         this.notifications.showSuccessMessage('Парсинг було успішно розпочато');
 
         this.parsingService
