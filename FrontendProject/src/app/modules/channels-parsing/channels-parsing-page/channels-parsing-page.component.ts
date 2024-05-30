@@ -108,6 +108,7 @@ export class ChannelsParsingPageComponent extends BaseComponent implements OnIni
                     this.channels = channels;
                     this.notifications.showSuccessMessage('Канал успішно збережено');
                     this.spinnerService.hide()
+                    this.saveChannelForm.reset();
                 },
                 error: (error) => {
                     this.notifications.showErrorMessage('Трапилася помилка');
