@@ -38,6 +38,7 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
                 error => {
                     this.notifications.showErrorMessage('Трапилася помилка');
                     console.log(error);
+                    this.spinnerService.hide();
                 },
             );
     }
