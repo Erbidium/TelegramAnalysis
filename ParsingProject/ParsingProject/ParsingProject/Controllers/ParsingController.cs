@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Entities;
@@ -16,6 +18,7 @@ public class ParsingController : ControllerBase
 
     private readonly IChannelParsingService _channelParsingService;
     private readonly ParsingUpdateHostedService _parsingUpdateHostedService;
+    private readonly IValidator<ChannelsParsingDto> _channelsParsingDtoValidator;
 
     private readonly ParsingProjectContext _dataContext;
 
@@ -24,18 +27,27 @@ public class ParsingController : ControllerBase
         ParsingUpdateHostedService parsingUpdateHostedService,
         ILogger<ParsingController> logger,
         WTelegramService wt,
-        ParsingProjectContext dataContext)
+        ParsingProjectContext dataContext,
+        IValidator<ChannelsParsingDto> channelsParsingDtoValidator)
     {
         _channelParsingService = channelParsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
         _logger = logger;
         WT = wt;
         _dataContext = dataContext;
+        _channelsParsingDtoValidator = channelsParsingDtoValidator;
     }
 
     [HttpPost]
     public async Task<IActionResult> ParseChannels([FromBody]ChannelsParsingDto channelsParsing, CancellationToken cancellationToken)
     {
+        var validationResult = await _channelsParsingDtoValidator.ValidateAsync(channelsParsing);
+        if (!validationResult.IsValid)
+        {
+            validationResult.AddToModelState(ModelState);
+            return BadRequest(ModelState);
+        }
+
         await _channelParsingService.ParseChannelsDataAsync(WT, channelsParsing.ParsingDate, cancellationToken);
 
         return Ok();

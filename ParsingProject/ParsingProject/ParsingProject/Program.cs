@@ -37,7 +37,8 @@ builder.Services.AddDbContext<ParsingProjectContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAutoMapper(Assembly.GetAssembly(typeof(TestProfile)));
+builder.Services.AddAutoMapper();
+builder.Services.AddValidation();
 
 var app = builder.Build();
 
