@@ -17,9 +17,7 @@ import { MatNativeDateModule, NativeDateAdapter } from '@angular/material/core';
         ChannelsParsingRoutingModule,
         SharedModule,
         MaterialModule,
-        MatDatepickerModule,
-        ReactiveFormsModule,
-        MatNativeDateModule
+        ReactiveFormsModule
     ],
     providers: [
         MatDatepickerModule,

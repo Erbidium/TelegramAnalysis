@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Channel } from '@core/models/channel';
 import { ParsingStatistics } from '@core/models/parsing-statistics';
-import { SpreadGraphItem } from '@core/models/spread-graph-item';
+import { DistributionGraphNode } from '@core/models/distribution-graph-node';
 import { HttpInternalService } from '@core/services/http-internal.service';
 import { Observable } from 'rxjs';
 

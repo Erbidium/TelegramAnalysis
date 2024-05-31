@@ -1,4 +1,4 @@
-export interface SpreadGraphItem {
+export interface DistributionGraphNode {
     post_id: number;
     text: string;
     similarity: number;

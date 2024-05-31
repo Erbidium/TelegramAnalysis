@@ -2,7 +2,7 @@ import { formatDate } from '@angular/common';
 import { Component, Inject, LOCALE_ID } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BaseComponent } from '@core/base/base.component';
-import { SpreadGraphItem } from '@core/models/spread-graph-item';
+import { DistributionGraphNode } from '@core/models/distribution-graph-node';
 import { NotificationService } from '@core/services/notification.service';
 import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { EChartsOption } from 'echarts';
@@ -40,19 +40,19 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
         super();
     }
 
-    loadSpreadGraph() {
+    loadDistributionGraph() {
         const post = this.searchForm.value.postText!;
 
         this.spinnerService.show();
         this.analysisService.getPostDistributionGraph(post)
             .pipe(this.untilThis)
             .subscribe(
-                graphItems => {
+                graphNodes => {
                     this.spinnerService.hide();
-                    console.log(graphItems);
+                    console.log(graphNodes);
 
-                    const nodes = this.createNodes(graphItems);
-                    const edges = this.createEdges(graphItems, nodes);
+                    const nodes = this.createNodes(graphNodes);
+                    const edges = this.createEdges(graphNodes, nodes);
 
                     this.setupGraphVisualization(nodes, edges);
                 },
@@ -66,17 +66,17 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
             );
     }
 
-    createEdges(nodeItems: SpreadGraphItem[], nodes: { id: string, name: string }[]) {
+    createEdges(graphNodes: DistributionGraphNode[], nodes: { id: string, name: string }[]) {
         const edges = [];
 
         for (let i = 0; i < nodes.length; i++) {
-            const nodeItem = nodeItems[i];
+            const nodeItem = graphNodes[i];
             const node = nodes[i];
 
             const parentNodeId = nodeItem.root_id;
 
             if (parentNodeId != null) {
-                const parentNodeIndex = nodeItems.findIndex(n => n.post_id === parentNodeId);
+                const parentNodeIndex = graphNodes.findIndex(n => n.post_id === parentNodeId);
 
                 if (parentNodeIndex >= 0) {
                     edges.push([+nodes[parentNodeIndex].id, +node.id]);
@@ -87,7 +87,7 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
         return edges;
     }
 
-    createNodes(nodeItems: SpreadGraphItem[]) {
+    createNodes(nodeItems: DistributionGraphNode[]) {
         const nodes = [];
 
         for (let i = 0; i < nodeItems.length; i++) {

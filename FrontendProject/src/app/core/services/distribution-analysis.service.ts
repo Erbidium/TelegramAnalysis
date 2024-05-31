@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SpreadGraphItem } from '@core/models/spread-graph-item';
+import { DistributionGraphNode } from '@core/models/distribution-graph-node';
 import { HttpInternalService } from '@core/services/http-internal.service';
 import { Observable } from 'rxjs';
 import { environment } from '@env/environment';
@@ -11,8 +11,8 @@ export class DistributionAnalysisService {
     // eslint-disable-next-line no-empty-function
     constructor(private httpService: HttpInternalService) {}
 
-    public getPostDistributionGraph(postText: string): Observable<SpreadGraphItem[]> {
-        return this.httpService.postRequest<SpreadGraphItem[]>(`${environment.analysisUrl}/get_data`, {
+    public getPostDistributionGraph(postText: string): Observable<DistributionGraphNode[]> {
+        return this.httpService.postRequest<DistributionGraphNode[]>(`${environment.analysisUrl}/get_data`, {
             text: postText,
         });
     }
