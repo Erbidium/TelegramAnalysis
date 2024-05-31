@@ -13,6 +13,11 @@ from flask import Flask, jsonify, request
 from sqlalchemy.orm import sessionmaker
 import pymorphy2
 import spacy
+from natasha import Segmenter, MorphVocab, NewsEmbedding, NewsMorphTagger, Doc
+from navec import Navec
+import os
+import tarfile
+
 
 
 nltk.download('punkt')
@@ -76,6 +81,24 @@ def get_data():
     # Load the pretrained Word2Vec model
     # model = api.load('word2vec-ruscorpora-300')
     # use model.n_similarity instead of model.wv.n_similarity for this model
+
+    # Natasha model
+
+    # Initialize Natasha components
+    segmenter = Segmenter()
+    morph_vocab = MorphVocab()
+    emb = NewsEmbedding()
+    morph_tagger = NewsMorphTagger(emb)
+
+    navec_path = 'C:\\Users\\Acer\\Downloads\\navec_hudlit_v1_12B_500K_300d_100q.tar'
+    # Check if file exists and is a valid tar archive
+    if not os.path.exists(navec_path):
+        raise FileNotFoundError(f"File not found: {navec_path}")
+    if not tarfile.is_tarfile(navec_path):
+        raise tarfile.ReadError(f"Invalid tar file: {navec_path}")
+
+    # Load Navec model
+    navec = Navec.load(navec_path)
 
     # find the oldest post
     oldest_post = None
