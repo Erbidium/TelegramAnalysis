@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using ParsingProject.DAL.Context;
+﻿using ParsingProject.DAL.Context;
 
 namespace ParsingProject.Extensions;
 

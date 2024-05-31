@@ -1,14 +1,12 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using ParsingProject.BackgroundServices;
-using ParsingProject.BLL;
-using ParsingProject.BLL.Services;
+using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
 using TL;
 using WTelegram;
 
-namespace ParsingProject;
+namespace ParsingProject.BLL.Services;
 
 public class ChannelParsingService : BaseService, IChannelParsingService
 {
@@ -34,16 +32,12 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         _dbRepository = dbRepository;
     }
 
-    public async Task ParseChannelsDataAsync(WTelegramService wt, DateTime parseDataUntilDate, CancellationToken cancellationToken)
+    public async Task ParseChannelsDataAsync(Client client, DateTime parseDataUntilDate, CancellationToken cancellationToken)
     {
         var messagesCountPerRequest = 100;
 
         bool allChannelsAreParsed = false;
-        
-        var client = wt.Client;
-        
-        //if (wt.User == null) throw new Exception("Complete the login first");
-        
+
         //var myself = await client.LoginUserIfNeeded();
         //Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
@@ -93,15 +87,11 @@ public class ChannelParsingService : BaseService, IChannelParsingService
         Console.WriteLine("Ended parsing");
     }
     
-    public async Task UpdateChannelsDataAsync(WTelegramService wt)
+    public async Task UpdateChannelsDataAsync(Client client)
     {
-        /*
         Console.WriteLine("Updating channels data");
-        
-        var client = wt.Client;
-        
-        //if (wt.User == null) throw new Exception("Complete the login first");
-        
+
+        /*
         var myself = await client.LoginUserIfNeeded();
         Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
 
@@ -112,7 +102,7 @@ public class ChannelParsingService : BaseService, IChannelParsingService
             if (!chat.IsChannel || !chat.IsActive)
                 continue;
 
-            if (chat is not TL.Channel channel)
+            if (chat is not Channel channel)
                 continue;
 
             await UpdateChannelDataAsync(channel, client);

@@ -1,4 +1,7 @@
-﻿namespace ParsingProject.BackgroundServices;
+﻿using ParsingProject.BLL.Interfaces;
+using ParsingProject.BLL.Services;
+
+namespace ParsingProject.BackgroundServices;
 
 public class ParsingUpdateHostedService : BackgroundService
 {
@@ -33,7 +36,10 @@ public class ParsingUpdateHostedService : BackgroundService
                 {
                     await using AsyncServiceScope asyncScope = _factory.CreateAsyncScope();
                     var parsingService = asyncScope.ServiceProvider.GetRequiredService<IChannelParsingService>();
-                    await parsingService.UpdateChannelsDataAsync(_wt);
+                    
+                    //if (_wt.User == null) throw new Exception("Complete the login first");
+                    
+                    await parsingService.UpdateChannelsDataAsync(_wt.Client);
                     
                     _executionCount++;
                     _logger.LogInformation(

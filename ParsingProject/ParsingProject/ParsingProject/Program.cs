@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject;
 using ParsingProject.BackgroundServices;
+using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.MappingProfiles;
 using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;
