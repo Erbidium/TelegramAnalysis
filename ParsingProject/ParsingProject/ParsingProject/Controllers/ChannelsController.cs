@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Mvc;
 using ParsingProject.BLL;
 using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;
@@ -17,16 +19,20 @@ public class ChannelsController : ControllerBase
 
     private readonly DBRepository _repository;
     
+    private readonly IValidator<SaveChannelDto> _saveChannelDtoValidator;
+    
     public ChannelsController
     (
         WTelegramService wt,
         ParsingProjectContext dataContext,
-        DBRepository dbRepository
+        DBRepository dbRepository,
+        IValidator<SaveChannelDto> saveChannelDtoValidator
     )
     {
         WT = wt;
         _dataContext = dataContext;
         _repository = dbRepository;
+        _saveChannelDtoValidator = saveChannelDtoValidator;
     }
     
     [HttpGet("channels-to-parse")]
@@ -38,9 +44,14 @@ public class ChannelsController : ControllerBase
     [HttpPost("save-channel")]
     public async Task<IActionResult> SaveChannel([FromBody] SaveChannelDto saveChannelDto)
     {
+        var validationResult = await _saveChannelDtoValidator.ValidateAsync(saveChannelDto);
+        if (!validationResult.IsValid)
+        {
+            validationResult.AddToModelState(ModelState);
+            return BadRequest(ModelState);
+        }
+        
         var link = saveChannelDto.ChannelLink;
-        if (!link.StartsWith("https://t.me/"))
-            return BadRequest();
 
         var chatUsername = link.Split('/')[^1];
         var client = WT.Client;
