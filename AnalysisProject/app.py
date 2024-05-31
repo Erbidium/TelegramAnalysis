@@ -3,6 +3,7 @@ import nltk
 from flask_cors import cross_origin, CORS
 from gensim.models import Word2Vec, Doc2Vec
 from gensim.models.doc2vec import TaggedDocument
+import gensim.downloader as api
 from sqlalchemy import create_engine, select
 from channel import Channel
 from post import Post
@@ -57,15 +58,24 @@ def get_data():
         processed_post = process_text(post, post.text, nlp)
         processed_posts.append(processed_post)
 
-    # Train the Word2Vec model on the input text
+
     documents = []
     counter = 0
     #for pr in processed_posts:
     documents.append(TaggedDocument(words=processed_input, tags=[f'doc{counter}']))
     counter += 1
+    # Train the Doc2Vec model on posts texts
     # model = Doc2Vec(documents, vector_size=100, window=5, min_count=1, workers=8)
+
+    # Train the Word2Vec model only on searched post
     model = Word2Vec([processed_input], vector_size=100, window=5, min_count=1, workers=8)
+
+    # Train the Word2Vec model on posts texts
     # model = Word2Vec(processed_posts, vector_size=100, window=5, min_count=1, workers=8)
+
+    # Load the pretrained Word2Vec model
+    # model = api.load('word2vec-ruscorpora-300')
+    # use model.n_similarity instead of model.wv.n_similarity for this model
 
     # find the oldest post
     oldest_post = None
@@ -80,6 +90,7 @@ def get_data():
             continue
 
         similarity_result = model.wv.n_similarity(processed_input, processed_post)
+        print(similarity_result)
 
         if similarity_result > 0.5:
             oldest_post = post
