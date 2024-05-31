@@ -15,6 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IChannelParsingService, ChannelParsingService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<StatisticsService>();
 builder.Services.AddScoped<DBRepository>();
 builder.Services.AddTransient<DataSeeder>();
 

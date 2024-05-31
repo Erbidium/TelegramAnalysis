@@ -3,6 +3,7 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Entities;
+using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;
 using ParsingProject.DTO;
 
@@ -19,6 +20,7 @@ public class ParsingController : ControllerBase
     private readonly IChannelParsingService _channelParsingService;
     private readonly ParsingUpdateHostedService _parsingUpdateHostedService;
     private readonly IValidator<ChannelsParsingDto> _channelsParsingDtoValidator;
+    private StatisticsService _statisticsService;
 
     private readonly ParsingProjectContext _dataContext;
 
@@ -28,7 +30,8 @@ public class ParsingController : ControllerBase
         ILogger<ParsingController> logger,
         WTelegramService wt,
         ParsingProjectContext dataContext,
-        IValidator<ChannelsParsingDto> channelsParsingDtoValidator)
+        IValidator<ChannelsParsingDto> channelsParsingDtoValidator,
+        StatisticsService statisticsService)
     {
         _channelParsingService = channelParsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
@@ -36,6 +39,7 @@ public class ParsingController : ControllerBase
         WT = wt;
         _dataContext = dataContext;
         _channelsParsingDtoValidator = channelsParsingDtoValidator;
+        _statisticsService = statisticsService;
     }
 
     [HttpPost]
@@ -68,45 +72,6 @@ public class ParsingController : ControllerBase
     [HttpGet("parsing-statistics")]
     public ActionResult<ParsingStatisticsModel> GetParsingStatistics()
     {
-        return new ParsingStatisticsModel
-        {
-            ChannelsStatistics = _dataContext.Channels
-                .Where(c => !c.IsDeleted)
-                .ToList()
-                .Select(c =>
-                {
-                    var channelPosts = _dataContext.Posts.Where(p => p.ChannelId == c.Id);
-                    
-                    var firstChannelParsedPost = channelPosts.OrderBy(p => p.CreatedAt).FirstOrDefault();
-                    var lastChannelParsedPost = channelPosts.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
-
-                    int postsCount = channelPosts.Count();
-                    int parsedReactionsCount = _dataContext.PostReactions
-                        .Include(r => r.Post)
-                        .Count(r => r.Post.ChannelId == c.Id);
-                    
-                    int parsedCommentsCount = _dataContext.Comments
-                        .Include(comment => comment.Post)
-                        .Count(r => r.Post.ChannelId == c.Id);
-                    
-                    return new ChannelStatisticsModel
-                    {
-                        Channel = new ChannelModel
-                        {
-                            Id = c.Id,
-                            TelegramId = c.TelegramId,
-                            ParticipantsCount = c.ParticipantsCount,
-                            MainUsername = c.MainUsername,
-                            Title = c.Title
-                        },
-                        StartDate = firstChannelParsedPost?.CreatedAt,
-                        EndDate = lastChannelParsedPost?.CreatedAt,
-                        ParsedPostsCount = postsCount,
-                        ParsedReactionsCount = parsedReactionsCount,
-                        ParsedCommentsCount = parsedCommentsCount
-                    };
-                }
-            ).ToList()
-        };
+        return _statisticsService.GetParsingStatistics();
     }
 }
