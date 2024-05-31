@@ -1,5 +1,6 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using ParsingProject.BackgroundServices;
 using ParsingProject.BLL;
 using ParsingProject.BLL.Services;
 using ParsingProject.BLL.Services.Abstract;

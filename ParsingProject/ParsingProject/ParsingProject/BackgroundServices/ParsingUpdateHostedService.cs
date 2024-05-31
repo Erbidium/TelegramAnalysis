@@ -1,10 +1,10 @@
-﻿namespace ParsingProject;
+﻿namespace ParsingProject.BackgroundServices;
 
 public class ParsingUpdateHostedService : BackgroundService
 {
     private readonly ILogger<ParsingUpdateHostedService> _logger;
     private readonly IServiceScopeFactory _factory;
-    private readonly TimeSpan _period = TimeSpan.FromSeconds(5); //.FromHours(1);
+    private readonly TimeSpan _period = TimeSpan.FromHours(1); //FromSeconds(5);
     private int _executionCount;
 
     private WTelegramService _wt;

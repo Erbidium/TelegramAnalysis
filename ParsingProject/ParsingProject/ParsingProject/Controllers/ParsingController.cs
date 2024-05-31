@@ -2,6 +2,7 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using ParsingProject.BackgroundServices;
 using ParsingProject.BLL.Entities;
 using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;

@@ -1,6 +1,7 @@
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject;
+using ParsingProject.BackgroundServices;
 using ParsingProject.BLL.MappingProfiles;
 using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;
@@ -16,6 +17,7 @@ builder.Services.AddScoped<IChannelParsingService, ChannelParsingService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<CommentService>();
 builder.Services.AddScoped<StatisticsService>();
+builder.Services.AddScoped<ChannelService>();
 builder.Services.AddScoped<DBRepository>();
 builder.Services.AddTransient<DataSeeder>();
 

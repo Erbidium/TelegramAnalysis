@@ -1,6 +1,6 @@
 ﻿using TL;
 
-namespace ParsingProject;
+namespace ParsingProject.BackgroundServices;
 
 public sealed class WTelegramService : BackgroundService
 {

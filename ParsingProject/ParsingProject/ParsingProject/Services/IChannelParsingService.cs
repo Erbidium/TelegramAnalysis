@@ -1,4 +1,6 @@
-﻿namespace ParsingProject;
+﻿using ParsingProject.BackgroundServices;
+
+namespace ParsingProject;
 
 public interface IChannelParsingService
 {
