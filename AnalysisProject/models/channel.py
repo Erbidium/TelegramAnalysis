@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from base import Base
+from models.base import Base
 from sqlalchemy import String
 
 class Channel(Base):

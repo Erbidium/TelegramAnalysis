@@ -1,24 +1,19 @@
 import re
 import nltk
 from flask_cors import cross_origin, CORS
-from gensim.models import Word2Vec, Doc2Vec
+from gensim.models import Word2Vec
 from gensim.models.doc2vec import TaggedDocument
-import gensim.downloader as api
 from sqlalchemy import create_engine, select
-from channel import Channel
-from post import Post
+from models.channel import Channel
+from models.post import Post
 from swagger_gen.lib.wrappers import swagger_metadata
 from swagger_gen.swagger import Swagger
 from flask import Flask, jsonify, request
 from sqlalchemy.orm import sessionmaker
 import pymorphy2
 import spacy
-from natasha import Segmenter, MorphVocab, NewsEmbedding, NewsMorphTagger, Doc
-from navec import Navec
-import os
-import tarfile
 
-
+from similarity_analysis.natasha_navec import get_embedding
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -51,6 +46,9 @@ def get_data():
         print('Invalid input text')
         return jsonify({"error": "Invalid input text"}), 400
 
+    # Natasha
+    input_embedding = get_embedding(processed_input)
+
     Session = sessionmaker(bind=engine)
     session = Session()
 
@@ -82,24 +80,6 @@ def get_data():
     # model = api.load('word2vec-ruscorpora-300')
     # use model.n_similarity instead of model.wv.n_similarity for this model
 
-    # Natasha model
-
-    # Initialize Natasha components
-    segmenter = Segmenter()
-    morph_vocab = MorphVocab()
-    emb = NewsEmbedding()
-    morph_tagger = NewsMorphTagger(emb)
-
-    navec_path = 'C:\\Users\\Acer\\Downloads\\navec_hudlit_v1_12B_500K_300d_100q.tar'
-    # Check if file exists and is a valid tar archive
-    if not os.path.exists(navec_path):
-        raise FileNotFoundError(f"File not found: {navec_path}")
-    if not tarfile.is_tarfile(navec_path):
-        raise tarfile.ReadError(f"Invalid tar file: {navec_path}")
-
-    # Load Navec model
-    navec = Navec.load(navec_path)
-
     # find the oldest post
     oldest_post = None
     oldest_post_index = None
@@ -111,6 +91,10 @@ def get_data():
         processed_post = processed_posts[index]
         if len(processed_post) == 0:
             continue
+
+        # Natasha
+        post_embedding = get_embedding(processed_post)
+        # similarity_result = cosine_similarity(input_embedding, post_embedding)
 
         similarity_result = model.wv.n_similarity(processed_input, processed_post)
         print(similarity_result)
@@ -151,6 +135,9 @@ def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordere
         if len(processed_post) == 0:
             continue
 
+        # Natasha
+        post_embedding = get_embedding(processed_post)
+        # similarity_result = cosine_similarity(input_embedding, post_embedding)
         similarity_result = model.wv.n_similarity(processed_post_text, processed_post)
 
         post_id = post.id
