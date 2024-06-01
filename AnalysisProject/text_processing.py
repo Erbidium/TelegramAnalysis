@@ -3,13 +3,12 @@ import nltk
 import pymorphy2
 import spacy
 
-nltk.download('punkt')
-nltk.download('stopwords')
+def load_nltk():
+    nltk.download('punkt')
+    nltk.download('stopwords')
 
 # Initialize lemmatizer
 morph = pymorphy2.MorphAnalyzer()
-
-nlp = spacy.load('ru_core_news_md')
 
 def process_text_nltk(text):
     stop_words = set(nltk.corpus.stopwords.words('russian'))
@@ -32,7 +31,7 @@ def process_text_nltk(text):
 
     return lemmatized_tokens
 
-def process_text_spacy(text):
+def process_text_spacy(text, nlp):
     stop_words = nlp.Defaults.stop_words
     text = re.sub(r'\*\*\w+\*\*', '', text)
     text = re.sub(r'http\S+', '', text)

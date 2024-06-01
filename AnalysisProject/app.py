@@ -1,3 +1,4 @@
+import spacy
 from flask_cors import cross_origin, CORS
 from gensim.models import Word2Vec
 from gensim.models.doc2vec import TaggedDocument
@@ -12,7 +13,7 @@ from sqlalchemy.orm import sessionmaker
 from posts_search import find_spread_by_root
 from similarity_analysis.doc2vec import get_pretrained_model_ruscorpora
 from similarity_analysis.natasha_navec import get_embedding
-from text_processing import process_text_spacy
+from text_processing import process_text_spacy, load_nltk, process_text_nltk
 
 servername = "(localdb)\MSSQLLocalDB"
 dbname = "parsingdb"
@@ -23,6 +24,11 @@ engine = create_engine(
 app = Flask(__name__)
 cors = CORS(app)
 
+load_nltk()
+
+nlp = spacy.load('ru_core_news_md')
+
+
 @app.route('/get_data', methods=['POST'])
 @cross_origin(supports_credentials=True)
 @swagger_metadata(
@@ -32,7 +38,7 @@ cors = CORS(app)
 def get_data():
     input_text = request.json.get('text', '')
 
-    processed_input = process_text_spacy(input_text)
+    processed_input = process_text_nltk(input_text)
     if not processed_input:
         print('Invalid input text')
         return jsonify({"error": "Invalid input text"}), 400
@@ -49,7 +55,7 @@ def get_data():
     posts_ordered_by_date = sorted(posts, key=lambda p: p.createdat)
     processed_posts = []
     for post in posts_ordered_by_date:
-        processed_post = process_text_spacy(post, post.text, nlp)
+        processed_post = process_text_nltk(post.text)
         processed_posts.append(processed_post)
 
 
@@ -82,7 +88,7 @@ def get_data():
             continue
 
         # Natasha
-        post_embedding = get_embedding(processed_post)
+        # post_embedding = get_embedding(processed_post)
         # similarity_result = cosine_similarity(input_embedding, post_embedding)
 
         similarity_result = model.wv.n_similarity(processed_input, processed_post)
@@ -110,7 +116,7 @@ def get_data():
     if oldest_post_index is None:
         return jsonify({"error": "Such post is not found"}), 400
 
-    find_spread_by_root(oldest_post, oldest_post_index, oldest_post_processed, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, 0, channels, processed_input)
+    find_spread_by_root(oldest_post, oldest_post_index, oldest_post_processed, posts_ordered_by_date, similar_posts, model, processed_posts, 0, channels, processed_input)
 
     print(f'Similar posts: {similar_posts}')
     return jsonify(similar_posts)

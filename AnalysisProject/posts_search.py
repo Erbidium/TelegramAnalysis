@@ -1,6 +1,6 @@
 from similarity_analysis.natasha_navec import get_embedding
 
-def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, depth, channels, processed_input):
+def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordered_by_date, similar_posts, model, processed_posts, depth, channels, processed_input):
     for index, post in enumerate(posts_ordered_by_date):
         if index <= post_index:
             continue
@@ -10,7 +10,7 @@ def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordere
             continue
 
         # Natasha
-        post_embedding = get_embedding(processed_post)
+        # post_embedding = get_embedding(processed_post)
         # similarity_result = cosine_similarity(input_embedding, post_embedding)
         similarity_result = model.wv.n_similarity(processed_post_text, processed_post)
 
@@ -40,5 +40,5 @@ def find_spread_by_root(root_post, post_index, processed_post_text, posts_ordere
                 "channel_title": channel.title
             })
 
-            find_spread_by_root(post, index, processed_post, posts_ordered_by_date, similar_posts, model, nlp, processed_posts, depth + 1, channels, processed_input)
+            find_spread_by_root(post, index, processed_post, posts_ordered_by_date, similar_posts, model, processed_posts, depth + 1, channels, processed_input)
             break
