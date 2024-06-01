@@ -1,3 +1,6 @@
+import re
+
+import nltk
 from natasha import Segmenter, MorphVocab, NewsEmbedding, NewsMorphTagger, Doc
 from navec import Navec
 import os
@@ -17,6 +20,27 @@ if not tarfile.is_tarfile(navec_path):
     raise tarfile.ReadError(f"Invalid tar file: {navec_path}")
 
 navec = Navec.load(navec_path)
+
+def process_text_navec(text):
+    stop_words = set(nltk.corpus.stopwords.words('russian'))
+
+    text = re.sub(r'\*\*\w+\*\*', '', text)
+    text = re.sub(r'http\S+', '', text)
+    text = re.sub(r'#\S+', '', text)
+    text = re.sub(r'@\S+', '', text)
+    text = re.sub(r'\b\d+\b(?!\d{4}\b)', '', text)
+
+    tokens = nltk.word_tokenize(text.lower())
+    tokens = [word for word in tokens if word.isalpha() and word not in stop_words]
+
+    doc = Doc(' '.join(tokens))
+    doc.segment(segmenter)
+    doc.tag_morph(morph_tagger)
+    for token in doc.tokens:
+        token.lemmatize(morph_vocab)
+    lemmatized_tokens = [token.lemma for token in doc.tokens]
+
+    return lemmatized_tokens
 
 def get_embedding(text_tokens):
     embeddings = [navec[token] for token in text_tokens if token in navec]
