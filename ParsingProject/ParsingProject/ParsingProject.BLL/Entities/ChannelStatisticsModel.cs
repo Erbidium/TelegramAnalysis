@@ -1,6 +1,4 @@
-﻿using ParsingProject.DAL.Entities;
-
-namespace ParsingProject.BLL.Entities;
+﻿namespace ParsingProject.BLL.Entities;
 
 public class ChannelStatisticsModel
 {

@@ -13,5 +13,5 @@ public class Channel
     
     public ICollection<Post> Posts { get; set; }
 
-    public bool IsDeleted { get; set; } = false;
+    public bool IsDeleted { get; set; }
 }

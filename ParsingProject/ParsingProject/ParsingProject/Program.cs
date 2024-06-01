@@ -1,25 +1,24 @@
-using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using ParsingProject;
 using ParsingProject.BackgroundServices;
 using ParsingProject.BLL.Interfaces;
-using ParsingProject.BLL.MappingProfiles;
 using ParsingProject.BLL.Services;
 using ParsingProject.DAL.Context;
+using ParsingProject.DAL.Interfaces;
+using ParsingProject.DAL.Repositories;
 using ParsingProject.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IChannelParsingService, ChannelParsingService>();
-builder.Services.AddScoped<PostService>();
-builder.Services.AddScoped<CommentService>();
-builder.Services.AddScoped<StatisticsService>();
-builder.Services.AddScoped<ChannelService>();
-builder.Services.AddScoped<DBRepository>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IChannelService, ChannelService>();
+
+builder.Services.AddScoped<IReactionsRepository, ReactionsRepository>();
 builder.Services.AddTransient<DataSeeder>();
 
 builder.Services.AddSingleton<ParsingUpdateHostedService>();

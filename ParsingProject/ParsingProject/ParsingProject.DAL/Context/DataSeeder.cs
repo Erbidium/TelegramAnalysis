@@ -4,24 +4,24 @@ namespace ParsingProject.DAL.Context;
 
 public class DataSeeder
 {
-    private readonly ParsingProjectContext parsingProjectContext;
+    private readonly ParsingProjectContext _parsingProjectContext;
 
     public DataSeeder(ParsingProjectContext parsingProjectContext)
     {
-        this.parsingProjectContext = parsingProjectContext;
+        this._parsingProjectContext = parsingProjectContext;
     }
 
     public void Seed()
     {
-        if(!parsingProjectContext.Reactions.Any())
+        if(!_parsingProjectContext.Reactions.Any())
         {
             var reactions = Reactions.ReactionsMap.Keys.Select(r => new Reaction
             {
                 Emoticon = r
             }).ToArray();
             
-            parsingProjectContext.Reactions.AddRange(reactions);
-            parsingProjectContext.SaveChanges();
+            _parsingProjectContext.Reactions.AddRange(reactions);
+            _parsingProjectContext.SaveChanges();
         }
     }
 }

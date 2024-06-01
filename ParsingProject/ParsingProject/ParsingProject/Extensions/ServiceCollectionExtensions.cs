@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
 {
     public static void AddAutoMapper(this IServiceCollection services)
     {
-        services.AddAutoMapper(Assembly.GetAssembly(typeof(TestProfile)));
+        services.AddAutoMapper(Assembly.GetAssembly(typeof(ChannelProfile)));
     }
     
     public static void AddValidation(this IServiceCollection services)

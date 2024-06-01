@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using ParsingProject.BackgroundServices;
 using ParsingProject.BLL.Entities;
 using ParsingProject.BLL.Interfaces;
-using ParsingProject.BLL.Services;
-using ParsingProject.DAL.Context;
 using ParsingProject.DTO;
 
 namespace ParsingProject.Controllers;
@@ -14,22 +12,22 @@ namespace ParsingProject.Controllers;
 [Route("[controller]")]
 public class ParsingController : ControllerBase
 {
-    private readonly WTelegramService WT;
+    private readonly WTelegramService _wt;
     private readonly IChannelParsingService _channelParsingService;
     private readonly ParsingUpdateHostedService _parsingUpdateHostedService;
     private readonly IValidator<ChannelsParsingDto> _channelsParsingDtoValidator;
-    private StatisticsService _statisticsService;
+    private readonly IStatisticsService _statisticsService;
 
     public ParsingController(
         IChannelParsingService channelParsingService,
         ParsingUpdateHostedService parsingUpdateHostedService,
         WTelegramService wt,
         IValidator<ChannelsParsingDto> channelsParsingDtoValidator,
-        StatisticsService statisticsService)
+        IStatisticsService statisticsService)
     {
         _channelParsingService = channelParsingService;
         _parsingUpdateHostedService = parsingUpdateHostedService;
-        WT = wt;
+        _wt = wt;
         _channelsParsingDtoValidator = channelsParsingDtoValidator;
         _statisticsService = statisticsService;
     }
@@ -44,9 +42,9 @@ public class ParsingController : ControllerBase
             return BadRequest(ModelState);
         }
         
-        if (WT.User == null) throw new Exception("Complete the login first");
+        if (_wt.User == null) throw new Exception("Complete the login first");
 
-        await _channelParsingService.ParseChannelsDataAsync(WT.Client, channelsParsing.ParsingDate, cancellationToken);
+        await _channelParsingService.ParseChannelsDataAsync(_wt.Client, channelsParsing.ParsingDate, cancellationToken);
 
         return Ok();
     }

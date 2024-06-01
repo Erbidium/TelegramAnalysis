@@ -2,7 +2,7 @@
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
 using ParsingProject.BackgroundServices;
-using ParsingProject.BLL.Services;
+using ParsingProject.BLL.Interfaces;
 using ParsingProject.DTO;
 
 namespace ParsingProject.Controllers;
@@ -11,20 +11,18 @@ namespace ParsingProject.Controllers;
 [Route("[controller]")]
 public class ChannelsController : ControllerBase
 {
-    private readonly WTelegramService WT;
-
+    private readonly WTelegramService _wt;
     private readonly IValidator<SaveChannelDto> _saveChannelDtoValidator;
-
-    private ChannelService _channelService;
+    private readonly IChannelService _channelService;
     
     public ChannelsController
     (
         WTelegramService wt,
         IValidator<SaveChannelDto> saveChannelDtoValidator,
-        ChannelService channelService
+        IChannelService channelService
     )
     {
-        WT = wt;
+        _wt = wt;
         _saveChannelDtoValidator = saveChannelDtoValidator;
         _channelService = channelService;
     }
@@ -45,7 +43,7 @@ public class ChannelsController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        return await _channelService.SaveChannel(saveChannelDto.ChannelLink, WT.Client) ? Ok() : BadRequest();
+        return await _channelService.SaveChannel(saveChannelDto.ChannelLink, _wt.Client) ? Ok() : BadRequest();
     }
     
     [HttpDelete("delete-channel/{id:long}")]

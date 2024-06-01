@@ -1,19 +1,16 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Entities;
+using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
+using ParsingProject.DAL.Repositories;
 
 namespace ParsingProject.BLL.Services;
 
-public class StatisticsService : BaseService
+public class StatisticsService : BaseService, IStatisticsService
 {
-    private DBRepository _dbRepository;
-    
-    public StatisticsService(DBRepository dbRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper)
-    {
-        _dbRepository = dbRepository;
-    }
+    public StatisticsService(ReactionsRepository reactionsRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper) { }
 
     public ParsingStatisticsModel GetParsingStatistics()
     {

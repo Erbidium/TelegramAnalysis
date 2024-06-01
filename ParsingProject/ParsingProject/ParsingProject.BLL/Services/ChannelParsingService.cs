@@ -15,13 +15,10 @@ public class ChannelParsingService : BaseService, IChannelParsingService
     private PostService _postService;
     private CommentService _commentService;
 
-    private DBRepository _dbRepository;
-
     public ChannelParsingService
     (
         PostService postService,
         CommentService commentService,
-        DBRepository dbRepository,
         ParsingProjectContext context,
         IMapper mapper
     ) :
@@ -29,7 +26,6 @@ public class ChannelParsingService : BaseService, IChannelParsingService
     {
         _postService = postService;
         _commentService = commentService;
-        _dbRepository = dbRepository;
     }
 
     public async Task ParseChannelsDataAsync(Client client, DateTime parseDataUntilDate, CancellationToken cancellationToken)

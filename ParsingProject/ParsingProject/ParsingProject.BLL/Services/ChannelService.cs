@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
 using TL;
@@ -6,15 +7,10 @@ using WTelegram;
 
 namespace ParsingProject.BLL.Services;
 
-public class ChannelService : BaseService
+public class ChannelService : BaseService, IChannelService
 {
-    private DBRepository _repository;
-
-    public ChannelService(ParsingProjectContext context, IMapper mapper, DBRepository repository) : base(context,
-        mapper)
-    {
-        _repository = repository;
-    }
+    public ChannelService(ParsingProjectContext context, IMapper mapper) :
+        base(context, mapper) { }
 
     public List<DAL.Entities.Channel> GetChannelsToParse()
     {
@@ -47,7 +43,9 @@ public class ChannelService : BaseService
         var ch = _context.Channels.FirstOrDefault(c => c.TelegramId == chatId);
         if (ch is null)
         {
-            await _repository.SaveChannelAsync(channel);
+            var channelDbModel = _mapper.Map<DAL.Entities.Channel>(ch);
+            _context.Channels.Add(channelDbModel);
+            await _context.SaveChangesAsync();
         }
         else
         {

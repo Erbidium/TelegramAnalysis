@@ -1,23 +1,31 @@
 ﻿using AutoMapper;
+using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
+using ParsingProject.DAL.Entities;
+using ParsingProject.DAL.Repositories;
 using TL;
 using WTelegram;
+using Channel = TL.Channel;
 
 namespace ParsingProject.BLL.Services;
 
-public class PostService : BaseService
+public class PostService : BaseService, IPostService
 {
-    private DBRepository _dbRepository;
+    private ReactionsRepository _reactionsRepository;
 
-    public PostService(DBRepository dbRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper)
+    public PostService(ReactionsRepository reactionsRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper)
     {
-        _dbRepository = dbRepository;
+        _reactionsRepository = reactionsRepository;
     }
     
     public async Task SavePostDataAsync(Message message, Channel channel, long channelId, Client client)
     {
-        var postId = await _dbRepository.SavePostAsync(message, channelId);
+        var postDbModel = _mapper.Map<Post>(message);
+        _context.Posts.Add(postDbModel);
+        await _context.SaveChangesAsync();
+        var postId = postDbModel.Id;
+
         /*
         if (message.replies is not null)
         {
@@ -53,7 +61,7 @@ public class PostService : BaseService
         
         if (message.reactions is not null)
         {
-            await _dbRepository.SavePostReactionsAsync(message, postId);
+            await _reactionsRepository.SavePostReactionsAsync(message, postId);
         }
     }
 }
