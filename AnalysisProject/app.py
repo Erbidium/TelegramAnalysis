@@ -1,3 +1,5 @@
+import os
+
 import spacy
 from flask_cors import cross_origin, CORS
 from gensim.models import Word2Vec
@@ -9,11 +11,16 @@ from swagger_gen.lib.wrappers import swagger_metadata
 from swagger_gen.swagger import Swagger
 from flask import Flask, jsonify, request
 from sqlalchemy.orm import sessionmaker
-
 from posts_search import find_spread_by_root
 from similarity_analysis.doc2vec import get_pretrained_model_ruscorpora
 from similarity_analysis.natasha_navec import get_embedding
 from text_processing import process_text_spacy, load_nltk, process_text_nltk
+
+# servername = os.getenv("SQLSERVER_SERVER", "localhost")
+# dbname = os.getenv("SQLSERVER_DB", "parsing")
+# username = os.getenv("SQLSERVER_USER", "sa")
+# password = os.getenv("SQLSERVER_PASSWORD", "your_password")
+# connection_string = f"mssql+pyodbc://{username}:{password}@{servername}/{dbname}?driver=ODBC+Driver+17+for+SQL+Server"
 
 servername = "(localdb)\MSSQLLocalDB"
 dbname = "parsingdb"
