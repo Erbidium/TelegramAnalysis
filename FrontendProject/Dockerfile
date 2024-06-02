@@ -7,7 +7,7 @@ RUN npm run build
 
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY --from=my-app-build /usr/src/app/dist/parsing   /usr/share/nginx/html
+COPY --from=my-app-build /usr/src/app/dist/frontend-project   /usr/share/nginx/html
 EXPOSE 80
 
 CMD ["/bin/sh",  "-c",  "envsubst < /usr/share/nginx/html/assets/env.sample.js > /usr/share/nginx/html/assets/env.js && exec nginx -g 'daemon off;'"]
