@@ -1,14 +1,48 @@
 services:
-  flask_app:
+  analysis_frontend-project:
+    depends_on:
+        - analysis_parsing-project
+        - analysis_analysis-project
+    image: erbidium/analysis_frontend-project
+    restart: on-failure
+    ports:
+        - "4200:80"
+    environment:
+        BACKEND_BASE_URL: http://localhost:5050
+        ANALYSIS_BASE_URL: http://localhost:5000
+    networks:
+        - localnet
+        - front
+  
+  analysis_parsing-project:
+    image: erbidium/analysis_parsing-project
+    restart: on-failure
+    ports:
+        - "5050:5050"
+    networks:
+        - localnet
+    environment:
+        ASPNETCORE_ENVIRONMENT: 'Development'
+        ConnectionStrings__DefaultConnection: "Server=sql_server;Database=ParsingDb;User=sa;Password=TestPassword!"
+        TZ: "Europe/Kiev"
+
+
+  analysis_analysis-project:
     build: .
     ports:
       - "5000:5000"
+    networks:
+        - localnet
     environment:
       - FLASK_ENV=development
-      - SQLSERVER_USER=your_user
-      - SQLSERVER_PASSWORD=your_password
-      - SQLSERVER_DB=parsing
-      - SQLSERVER_SERVER=db
+      - SQLSERVER_PASSWORD=TestPassword!
+      - SQLSERVER_DB=ParsingDb
     volumes:
       - .:/app
+
+networks:
+    localnet:
+        driver: bridge
+    front:
+        driver: bridge
 

@@ -397,3 +397,4 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 .idea/
+AnalysisProject/navec_hudlit_v1_12B_500K_300d_100q.tar

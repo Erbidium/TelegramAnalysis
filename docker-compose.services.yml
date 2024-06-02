@@ -1,17 +1,21 @@
-version: '3.8'
-
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
-      SA_PASSWORD: "your_password"
+      SA_PASSWORD: "TestPassword!"
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Express"
-      MSSQL_DATABASE: "parsing"
+      MSSQL_DATABASE: "ParsingDb"
     ports:
-      - "1433:1433"
+      - 1433:1433
+    networks:
+            - localnet
     volumes:
       - mssql_data:/var/opt/mssql
 
 volumes:
   mssql_data:
+
+networks:
+    localnet:
+        driver: bridge
