@@ -14,6 +14,9 @@ morph_tagger = NewsMorphTagger(emb)
 
 navec_path = 'C:\\Users\\Acer\\Downloads\\navec_hudlit_v1_12B_500K_300d_100q.tar'
 
+#docker path
+#navec_path = 'app/navec_hudlit_v1_12B_500K_300d_100q.tar'
+
 if not os.path.exists(navec_path):
     raise FileNotFoundError(f"File not found: {navec_path}")
 if not tarfile.is_tarfile(navec_path):
