@@ -51,7 +51,7 @@ def get_data():
         return jsonify({"error": "Invalid input text"}), 400
 
     # Natasha
-    input_embedding = get_embedding(processed_input)
+    # input_embedding = get_embedding(processed_input)
 
     Session = sessionmaker(bind=engine)
     session = Session()

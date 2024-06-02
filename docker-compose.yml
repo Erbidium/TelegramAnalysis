@@ -28,7 +28,7 @@ services:
 
 
   analysis_analysis-project:
-    build: .
+    image: erbidium/analysis_analysis-project
     ports:
       - "5000:5000"
     networks:
@@ -37,8 +37,6 @@ services:
       - FLASK_ENV=development
       - SQLSERVER_PASSWORD=TestPassword!
       - SQLSERVER_DB=ParsingDb
-    volumes:
-      - .:/app
 
 networks:
     localnet:
