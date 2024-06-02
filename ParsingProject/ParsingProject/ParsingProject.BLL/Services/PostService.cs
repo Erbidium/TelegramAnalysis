@@ -3,7 +3,7 @@ using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
 using ParsingProject.DAL.Entities;
-using ParsingProject.DAL.Repositories;
+using ParsingProject.DAL.Interfaces;
 using TL;
 using WTelegram;
 using Channel = TL.Channel;
@@ -12,9 +12,9 @@ namespace ParsingProject.BLL.Services;
 
 public class PostService : BaseService, IPostService
 {
-    private ReactionsRepository _reactionsRepository;
+    private IReactionsRepository _reactionsRepository;
 
-    public PostService(ReactionsRepository reactionsRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper)
+    public PostService(IReactionsRepository reactionsRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper)
     {
         _reactionsRepository = reactionsRepository;
     }

@@ -12,13 +12,13 @@ public class ChannelParsingService : BaseService, IChannelParsingService
 {
     private TimeSpan _updateDeltaTime = TimeSpan.FromDays(3);
 
-    private PostService _postService;
-    private CommentService _commentService;
+    private IPostService _postService;
+    private ICommentService _commentService;
 
     public ChannelParsingService
     (
-        PostService postService,
-        CommentService commentService,
+        IPostService postService,
+        ICommentService commentService,
         ParsingProjectContext context,
         IMapper mapper
     ) :

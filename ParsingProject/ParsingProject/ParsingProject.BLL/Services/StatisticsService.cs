@@ -10,7 +10,7 @@ namespace ParsingProject.BLL.Services;
 
 public class StatisticsService : BaseService, IStatisticsService
 {
-    public StatisticsService(ReactionsRepository reactionsRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper) { }
+    public StatisticsService(ParsingProjectContext context, IMapper mapper) : base(context, mapper) { }
 
     public ParsingStatisticsModel GetParsingStatistics()
     {
