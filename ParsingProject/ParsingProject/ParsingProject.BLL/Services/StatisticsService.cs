@@ -17,16 +17,15 @@ public class StatisticsService : BaseService, IStatisticsService
         return new ParsingStatisticsModel
         {
             ChannelsStatistics = _context.Channels
+                .Include(c => c.Posts)
                 .Where(c => !c.IsDeleted)
                 .ToList()
                 .Select(c =>
                     {
-                        var channelPosts = _context.Posts.Where(p => p.ChannelId == c.Id);
-                    
-                        var firstChannelParsedPost = channelPosts.OrderBy(p => p.CreatedAt).FirstOrDefault();
-                        var lastChannelParsedPost = channelPosts.OrderByDescending(p => p.CreatedAt).FirstOrDefault();
+                        var firstChannelParsedPost = c.Posts.MinBy(p => p.CreatedAt);
+                        var lastChannelParsedPost = c.Posts.MaxBy(p => p.CreatedAt);
 
-                        int postsCount = channelPosts.Count();
+                        int postsCount = c.Posts.Count;
                         int parsedReactionsCount = _context.PostReactions
                             .Include(r => r.Post)
                             .Count(r => r.Post.ChannelId == c.Id);
@@ -35,22 +34,19 @@ public class StatisticsService : BaseService, IStatisticsService
                             .Include(comment => comment.Post)
                             .Count(r => r.Post.ChannelId == c.Id);
                     
-                        return new ChannelStatisticsModel
+                        var channelStatisticsModel = new ChannelStatisticsModel
                         {
-                            Channel = new ChannelModel
-                            {
-                                Id = c.Id,
-                                TelegramId = c.TelegramId,
-                                ParticipantsCount = c.ParticipantsCount,
-                                MainUsername = c.MainUsername,
-                                Title = c.Title
-                            },
+                            Channel = _mapper.Map<ChannelModel>(c),
                             StartDate = firstChannelParsedPost?.CreatedAt,
                             EndDate = lastChannelParsedPost?.CreatedAt,
                             ParsedPostsCount = postsCount,
                             ParsedReactionsCount = parsedReactionsCount,
                             ParsedCommentsCount = parsedCommentsCount
                         };
+
+                        channelStatisticsModel.Channel.Posts = _mapper.Map<List<PostModel>>(c.Posts.ToList());
+
+                        return channelStatisticsModel;
                     }
                 )
                 .ToList()

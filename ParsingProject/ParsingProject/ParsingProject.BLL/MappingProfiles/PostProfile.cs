@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ParsingProject.BLL.Entities;
 using ParsingProject.DAL.Entities;
 using TL;   
 
@@ -17,5 +18,7 @@ public class PostProfile : Profile
             .ForMember(dest => dest.EditedAt, opt => opt.MapFrom(src => src.edit_date))
             .ForMember(dest => dest.ParsedAt, opt => opt.MapFrom(_ => DateTime.Now))
             .ForMember(dest => dest.ChannelId, opt => opt.Ignore());
+
+        CreateMap<Post, PostModel>();
     }
 }

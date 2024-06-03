@@ -10,4 +10,6 @@ public class ChannelModel
     
     public string? MainUsername { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
+
+    public List<PostModel> Posts { get; set; } = new();
 }

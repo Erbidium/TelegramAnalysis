@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ParsingProject.BLL.Entities;
 using ParsingProject.DAL.Entities;
 
 namespace ParsingProject.BLL.MappingProfiles;
@@ -12,5 +13,7 @@ public class ChannelProfile : Profile
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.TelegramId, opt => opt.MapFrom(src => src.ID))
             .ForMember(dest => dest.ParticipantsCount, opt => opt.MapFrom(src => src.participants_count));
+
+        CreateMap<Channel, ChannelModel>();
     }
 }
