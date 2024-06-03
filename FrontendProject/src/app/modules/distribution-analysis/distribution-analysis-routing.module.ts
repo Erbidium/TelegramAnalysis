@@ -6,6 +6,10 @@ import {
 
 const routes: Routes = [
     {
+        path: ':post-text',
+        component: DistributionAnalysisPageComponent,
+    },
+    {
         path: '',
         component: DistributionAnalysisPageComponent,
     },

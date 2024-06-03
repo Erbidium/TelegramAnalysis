@@ -1,5 +1,5 @@
 import { formatDate } from '@angular/common';
-import { Component, Inject, LOCALE_ID } from '@angular/core';
+import { Component, Inject, LOCALE_ID, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { BaseComponent } from '@core/base/base.component';
 import { DistributionGraphNode } from '@core/models/distribution-graph-node';
@@ -7,13 +7,14 @@ import { NotificationService } from '@core/services/notification.service';
 import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { EChartsOption } from 'echarts';
 import { DistributionAnalysisService } from "@core/services/distribution-analysis.service";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
     selector: 'app-distribution-analysis-page',
     templateUrl: './distribution-analysis-page.component.html',
     styleUrls: ['./distribution-analysis-page.component.sass'],
 })
-export class DistributionAnalysisPageComponent extends BaseComponent {
+export class DistributionAnalysisPageComponent extends BaseComponent implements OnInit {
     // @ts-ignore
     options: EChartsOption;
 
@@ -36,13 +37,28 @@ export class DistributionAnalysisPageComponent extends BaseComponent {
         @Inject(LOCALE_ID) private locale: string,
         private notifications: NotificationService,
         private spinnerService: SpinnerOverlayService,
+        private activateRoute: ActivatedRoute
     ) {
         super();
+    }
+
+    ngOnInit() {
+        this.activateRoute.params.pipe(this.untilThis).subscribe((params) => {
+            const post = params['post-text'];
+            if (post)
+            {
+                this.requestLoadDistributionGraph(post);
+            }
+        });
     }
 
     loadDistributionGraph() {
         const post = this.searchForm.value.postText!;
 
+        this.requestLoadDistributionGraph(post);
+    }
+
+    requestLoadDistributionGraph(post: string) {
         this.spinnerService.show();
         this.analysisService.getPostDistributionGraph(post)
             .pipe(this.untilThis)

@@ -16,7 +16,7 @@
             <mat-card *ngFor="let post of stat.channel.posts">
                 <mat-card-content>
                     {{post.text.substring(0, 800)}}...
-                    <button mat-flat-button color="primary">
+                    <button mat-flat-button color="primary" (click)="analyzePostDistribution(post)">
                         Проаналізувати розповсюдження посту
                     </button>
                 </mat-card-content>

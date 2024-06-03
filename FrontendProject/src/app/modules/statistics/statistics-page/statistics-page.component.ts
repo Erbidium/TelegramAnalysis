@@ -5,6 +5,8 @@ import { NotificationService } from '@core/services/notification.service';
 import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { StatisticsService } from '@core/services/statistics.service';
 import { Channel } from "@core/models/channel";
+import { Router } from "@angular/router";
+import { Post } from "@core/models/post";
 
 @Component({
     selector: 'app-statistics-page',
@@ -18,6 +20,7 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
         private statisticsService: StatisticsService,
         private notifications: NotificationService,
         private spinnerService: SpinnerOverlayService,
+        private router: Router
     ) {
         super();
     }
@@ -47,5 +50,9 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
                     this.spinnerService.hide();
                 },
             );
+    }
+
+    analyzePostDistribution(post: Post) {
+        this.router.navigateByUrl(`/distribution-analysis/${post.text}`);
     }
 }
