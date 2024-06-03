@@ -4,6 +4,7 @@ import { ChannelStatistics } from '@core/models/channel-statistics';
 import { NotificationService } from '@core/services/notification.service';
 import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { StatisticsService } from '@core/services/statistics.service';
+import { Channel } from "@core/models/channel";
 
 @Component({
     selector: 'app-statistics-page',
@@ -25,6 +26,10 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
         this.loadStatistics();
     }
 
+    toggleChannelMessages(channel: Channel) {
+        channel.showPosts = !channel.showPosts;
+    }
+
     private loadStatistics() {
         this.spinnerService.show();
 
@@ -33,6 +38,7 @@ export class StatisticsPageComponent extends BaseComponent implements OnInit {
             .subscribe(
                 parsingStatistics => {
                     this.parsingStatistics = [...this.parsingStatistics.concat(parsingStatistics.channelsStatistics)];
+                    this.parsingStatistics.forEach(c => c.channel.showPosts = false)
                     this.spinnerService.hide();
                 },
                 error => {

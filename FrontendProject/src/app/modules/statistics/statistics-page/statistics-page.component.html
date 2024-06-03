@@ -8,7 +8,19 @@
         <mat-card-subtitle>Учасників: {{stat.channel.participantsCount}}</mat-card-subtitle>
         <mat-card-content>Постів: {{stat.parsedPostsCount}} Реакцій: {{stat.parsedReactionsCount}} Коментарів: {{stat.parsedCommentsCount}} Дати: {{stat.startDate | date : 'short'}} - {{stat.endDate | date : 'short'}}</mat-card-content>
         <mat-card-actions>
-            <mat-icon>message</mat-icon>
+            <mat-icon (click)="toggleChannelMessages(stat.channel)">message</mat-icon>
         </mat-card-actions>
     </mat-card-header>
+    <mat-card-content *ngIf="stat.channel.showPosts">
+        <div class="posts-container">
+            <mat-card *ngFor="let post of stat.channel.posts">
+                <mat-card-content>
+                    {{post.text.substring(0, 800)}}...
+                    <button mat-flat-button color="primary">
+                        Проаналізувати розповсюдження посту
+                    </button>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </mat-card-content>
 </mat-card>

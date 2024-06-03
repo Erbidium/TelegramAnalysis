@@ -7,4 +7,6 @@ export interface Channel {
     mainUsername?: string;
     title: string;
     posts: Post[];
+
+    showPosts: boolean;
 }
