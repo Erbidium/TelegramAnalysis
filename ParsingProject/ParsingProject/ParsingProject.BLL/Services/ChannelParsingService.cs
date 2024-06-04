@@ -1,5 +1,9 @@
+using System.Globalization;
 using AutoMapper;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.EntityFrameworkCore;
+using ParsingProject.BLL.Entities;
 using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
@@ -110,6 +114,26 @@ public class ChannelParsingService : BaseService, IChannelParsingService
             await UpdateChannelDataAsync(channel, client);
         }
         */
+    }
+
+    public async Task BuildParsingDataset()
+    {
+        var postDataset = _context.Posts
+            .Include(p => p.Channel)
+            .Where(p => !p.Channel.IsDeleted)
+            .Select(p => new PostDatasetModel
+            {
+                Date = p.CreatedAt,
+                ChannelName = p.Channel.Title,
+                PostText = p.Text
+            })
+            .ToList();
+            
+        
+        await using var writer = new StreamWriter($"{Directory.GetCurrentDirectory()}\\dataset.csv");
+        await using var csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+        
+        await csv.WriteRecordsAsync(postDataset);
     }
 
     private async Task SaveChannelDataAsync(Channel channel, long channelId, Client client, int offset, int limit, int? offset_id = null)

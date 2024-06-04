@@ -66,4 +66,12 @@ public class ParsingController : ControllerBase
     {
         return _statisticsService.GetParsingStatistics();
     }
+
+    [HttpPost("build-parsing-dataset")]
+    public async Task<IActionResult> BuildParsingDataset()
+    {
+        await _channelParsingService.BuildParsingDataset();
+
+        return Ok();
+    }
 }
