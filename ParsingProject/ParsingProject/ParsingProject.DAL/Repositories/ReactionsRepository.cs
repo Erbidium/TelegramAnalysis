@@ -24,7 +24,7 @@ public class ReactionsRepository : IReactionsRepository
         await _context.SaveChangesAsync();
     }
 
-    private void SavePostReaction(ReactionCount reactionCount, long postId)
+    public void SavePostReaction(ReactionCount reactionCount, long postId)
     {
         string postEmoticon = (reactionCount.reaction as dynamic).emoticon;
         var reactionId = _context.Reactions.FirstOrDefault(r => r.Emoticon == postEmoticon)?.Id;
