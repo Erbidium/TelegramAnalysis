@@ -13,10 +13,12 @@ namespace ParsingProject.BLL.Services;
 public class PostService : BaseService, IPostService
 {
     private IReactionsRepository _reactionsRepository;
+    private ICommentService _commentService;
 
-    public PostService(IReactionsRepository reactionsRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper)
+    public PostService(ICommentService commentService, IReactionsRepository reactionsRepository, ParsingProjectContext context, IMapper mapper) : base(context, mapper)
     {
         _reactionsRepository = reactionsRepository;
+        _commentService = commentService;
     }
     
     public async Task SavePostDataAsync(Message message, Channel channel, long channelId, Client client)
@@ -25,7 +27,7 @@ public class PostService : BaseService, IPostService
         _context.Posts.Add(postDbModel);
         await _context.SaveChangesAsync();
         var postId = postDbModel.Id;
-
+        
         /*
         if (message.replies is not null)
         {
@@ -39,17 +41,12 @@ public class PostService : BaseService, IPostService
                     if (reply is not Message replyMessage || string.IsNullOrWhiteSpace(replyMessage.message))
                         continue;
 
-                    var commentId = await _dbRepository.SaveCommentAsync(replyMessage, postId);
-                    
-                    foreach (var reactionCount in replyMessage.reactions.results)
-                    {
-                        _dbRepository.SaveCommentReaction(reactionCount, commentId);
-                    }
-                
+                    await _commentService.SaveCommentDataAsync(replyMessage, postId);
+
                     await _context.SaveChangesAsync();
                 }
             
-                RandomDelay.Wait();
+                await RandomDelay.Wait();
 
                 if (replies.Count == 0)
                 {
