@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using ParsingProject.BLL.Interfaces;
 using ParsingProject.BLL.Services.Abstract;
 using ParsingProject.DAL.Context;
+using ParsingProject.DAL.Entities;
+using ParsingProject.DAL.Interfaces;
 using TL;
 using WTelegram;
+using Channel = TL.Channel;
 
 namespace ParsingProject.BLL.Services;
 
@@ -14,18 +17,21 @@ public class ChannelParsingService : BaseService, IChannelParsingService
 
     private IPostService _postService;
     private ICommentService _commentService;
+    private IReactionsRepository _reactionsRepository;
 
     public ChannelParsingService
     (
         IPostService postService,
         ICommentService commentService,
         ParsingProjectContext context,
+        IReactionsRepository reactionsRepository,
         IMapper mapper
     ) :
         base(context, mapper)
     {
         _postService = postService;
         _commentService = commentService;
+        _reactionsRepository = reactionsRepository;
     }
 
     public async Task ParseChannelsDataAsync(Client client, DateTime parseDataUntilDate, CancellationToken cancellationToken)
@@ -86,7 +92,7 @@ public class ChannelParsingService : BaseService, IChannelParsingService
     public async Task UpdateChannelsDataAsync(Client client)
     {
         Console.WriteLine("Updating channels data");
-
+        
         /*
         var myself = await client.LoginUserIfNeeded();
         Console.WriteLine($"We are logged-in as {myself} (id {myself.id})");
@@ -133,7 +139,7 @@ public class ChannelParsingService : BaseService, IChannelParsingService
 
         if (storedChannel is null)
         {
-            await SaveChannelDataAsync(channel, client);
+            await SaveChannelDataAsync(channel, channel.ID, client, 0, 100);
             return;
         }
         
@@ -160,7 +166,10 @@ public class ChannelParsingService : BaseService, IChannelParsingService
 
                 if (storedMessage.Hash != message.message.GetHashCode())
                 {
-                    await _dbRepository.SavePostAsync(message, storedChannel.Id);
+                    var postDbModel = _mapper.Map<Post>(message);
+                    postDbModel.ChannelId = storedChannel.Id;
+                    _context.Posts.Add(postDbModel);
+                    await _context.SaveChangesAsync();
                 }
 
                 if (message.replies is not null)
@@ -193,15 +202,18 @@ public class ChannelParsingService : BaseService, IChannelParsingService
                                 {
                                     string emoticon = (reactionCount.reaction as dynamic).emoticon;
 
-                                    var storedReaction = await _context.CommentReactions.Where(r =>
+                                    var storedReaction = await _context
+                                        .CommentReactions
+                                        .Include(cr => cr.Reaction)
+                                        .Where(r =>
                                             r.CommentId == storedReply.Id &&
-                                            r.Emoticon == emoticon)
+                                            r.Reaction!.Emoticon == emoticon)
                                         .OrderByDescending(r => r.ParsedAt)
                                         .FirstOrDefaultAsync();
 
                                     if (storedReaction == null || storedReaction.Count != reactionCount.count)
                                     {
-                                        _dbRepository.SaveCommentReaction(reactionCount, storedReply.Id);
+                                        _reactionsRepository.SaveCommentReaction(reactionCount, storedReply.Id);
                                     }
                                 }
                             }
@@ -230,7 +242,7 @@ public class ChannelParsingService : BaseService, IChannelParsingService
 
                         if (storedReaction == null || storedReaction.Count != reactionCount.count)
                         {
-                            _dbRepository.SavePostReaction(reactionCount, storedMessage.Id);
+                            _reactionsRepository.SavePostReaction(reactionCount, storedMessage.Id);
                         }
                     }
 
