@@ -10,6 +10,7 @@ public class PostProfile : Profile
     public PostProfile()
     {
         CreateMap<Message, Post>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.TelegramId, opt => opt.MapFrom(src => src.ID))
             .ForMember(dest => dest.Text, opt => opt.MapFrom(src => src.message))
             .ForMember(dest => dest.Hash, opt => opt.MapFrom(src => src.message.GetHashCode()))

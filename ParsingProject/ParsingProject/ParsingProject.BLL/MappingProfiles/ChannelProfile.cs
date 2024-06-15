@@ -9,6 +9,7 @@ public class ChannelProfile : Profile
     public ChannelProfile()
     {
         CreateMap<TL.Channel, Channel>()
+            .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.MainUsername, opt => opt.MapFrom(src => src.MainUsername))
             .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
             .ForMember(dest => dest.TelegramId, opt => opt.MapFrom(src => src.ID))

@@ -43,7 +43,7 @@ public class ChannelService : BaseService, IChannelService
         var ch = _context.Channels.FirstOrDefault(c => c.TelegramId == chatId);
         if (ch is null)
         {
-            var channelDbModel = _mapper.Map<DAL.Entities.Channel>(ch);
+            var channelDbModel = _mapper.Map<DAL.Entities.Channel>(channel);
             _context.Channels.Add(channelDbModel);
             await _context.SaveChangesAsync();
         }

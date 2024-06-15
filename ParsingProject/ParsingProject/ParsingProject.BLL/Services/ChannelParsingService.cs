@@ -49,7 +49,6 @@ public class ChannelParsingService : BaseService, IChannelParsingService
 
         while (!allChannelsAreParsed && !cancellationToken.IsCancellationRequested)
         {
-            /*
             allChannelsAreParsed = true;
             
             var channels = _context.Channels.ToList();
@@ -87,7 +86,6 @@ public class ChannelParsingService : BaseService, IChannelParsingService
                 
                 await RandomDelay.Wait();
             }
-            */
         }
         
         Console.WriteLine("Ended parsing");
