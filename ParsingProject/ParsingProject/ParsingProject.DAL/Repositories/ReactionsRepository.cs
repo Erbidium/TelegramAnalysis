@@ -26,7 +26,10 @@ public class ReactionsRepository : IReactionsRepository
 
     public void SavePostReaction(ReactionCount reactionCount, long postId)
     {
-        string postEmoticon = (reactionCount.reaction as dynamic).emoticon;
+        if (reactionCount.reaction is not ReactionEmoji reactionEmoji)
+            return;
+
+        string postEmoticon = reactionEmoji.emoticon;
         var reactionId = _context.Reactions.FirstOrDefault(r => r.Emoticon == postEmoticon)?.Id;
         
         _context.PostReactions.Add(new PostReaction

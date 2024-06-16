@@ -18,8 +18,11 @@ public class PostProfile : Profile
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.Date))
             .ForMember(dest => dest.EditedAt, opt => opt.MapFrom(src => src.edit_date))
             .ForMember(dest => dest.ParsedAt, opt => opt.MapFrom(_ => DateTime.Now))
-            .ForMember(dest => dest.ChannelId, opt => opt.Ignore());
-
+            .ForMember(dest => dest.ChannelId, opt => opt.Ignore())
+            .ForMember(dest => dest.Reactions, opt => opt.Ignore())
+            .ForMember(dest => dest.Comments, opt => opt.Ignore())
+            .ForMember(dest => dest.Channel, opt => opt.Ignore());
+        
         CreateMap<Post, PostModel>();
     }
 }

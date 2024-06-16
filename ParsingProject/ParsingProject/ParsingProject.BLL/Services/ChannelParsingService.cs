@@ -62,6 +62,9 @@ public class ChannelParsingService : BaseService, IChannelParsingService
                 var chat = chats.chats[ch.TelegramId];
                 if (chat is not Channel channel)
                     continue;
+
+                ch.ParticipantsCount = channel.participants_count;
+                await _context.SaveChangesAsync();
                 
                 // find oldest parsed message
                 var oldestMessage = await _context.Posts

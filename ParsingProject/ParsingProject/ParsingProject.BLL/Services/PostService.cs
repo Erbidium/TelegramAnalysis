@@ -24,6 +24,7 @@ public class PostService : BaseService, IPostService
     public async Task SavePostDataAsync(Message message, Channel channel, long channelId, Client client)
     {
         var postDbModel = _mapper.Map<Post>(message);
+        postDbModel.ChannelId = channelId;
         _context.Posts.Add(postDbModel);
         await _context.SaveChangesAsync();
         var postId = postDbModel.Id;
