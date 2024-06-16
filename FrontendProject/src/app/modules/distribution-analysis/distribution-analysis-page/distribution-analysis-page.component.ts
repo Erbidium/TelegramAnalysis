@@ -16,7 +16,10 @@ import { ActivatedRoute } from "@angular/router";
 })
 export class DistributionAnalysisPageComponent extends BaseComponent implements OnInit {
     // @ts-ignore
-    options: EChartsOption;
+    graphOptions: EChartsOption;
+
+    // @ts-ignore
+    treeOptions: EChartsOption;
 
     public searchForm = new FormGroup(
         {
@@ -71,6 +74,9 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
                     const edges = this.createEdges(graphNodes, nodes);
 
                     this.setupGraphVisualization(nodes, edges);
+
+                    const tree = this.createTreeStructure(graphNodes);
+                    this.setupTreeVisualization(tree);
                 },
                 error => {
                     this.spinnerService.hide();
@@ -118,8 +124,50 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
         return nodes;
     }
 
+    createTreeStructure(nodeItems: DistributionGraphNode[])  {
+        const nodeMap = new Map();
+        const rootNodes: DistributionTreeNode[] = [];
+        const nodes: DistributionTreeNode[] = [];
+
+        nodeItems.forEach(node => {
+            const parent = nodeItems.find(n => n.post_id === node.root_id);
+
+            if (parent && parent.channel_title === node.channel_title)
+                return;
+
+            const treeNode = {
+                children: [],
+                name: node.channel_title,
+                value: Math.floor(Math.random() * 10000),
+                parent: parent?.channel_title,
+                post: node
+            };
+
+            const existingNode = nodeMap.get(node.channel_title);
+
+            if (existingNode && existingNode.post.created_at < treeNode.post.created_at) {
+                return;
+            }
+
+            nodes.push(treeNode);
+            nodeMap.set(treeNode.name, treeNode);
+        });
+
+        nodes.forEach(node => {
+            if (node.parent !== undefined && nodeMap.has(node.parent)) {
+                nodeMap.get(node.parent).children.push(node);
+            } else {
+                rootNodes.push(node);
+            }
+        });
+
+        console.log(rootNodes);
+
+        return rootNodes[0];
+    }
+
     setupGraphVisualization(nodes: { id: string, name: string }[], edges: number[][]) {
-        this.options = {
+        this.graphOptions = {
             series: [
                 {
                     type: 'graph',
@@ -182,4 +230,41 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
             ],
         };
     }
+
+    setupTreeVisualization(tree: DistributionTreeNode) {
+        this.treeOptions = {
+            series: [
+                {
+                    type: 'tree',
+                    data: [tree],
+                    symbolSize: 20,
+                    label: {
+                        position: 'left',
+                        verticalAlign: 'middle',
+                        align: 'right',
+                        fontSize: 20,
+                    },
+                    leaves: {
+                        label: {
+                            position: 'right',
+                            verticalAlign: 'middle',
+                            align: 'left',
+                        },
+                    },
+                    expandAndCollapse: true,
+                    animationDuration: 550,
+                    animationDurationUpdate: 750,
+                },
+            ],
+        };
+    }
+}
+
+interface DistributionTreeNode
+{
+    name: string;
+    value: number;
+    children: DistributionTreeNode[];
+    parent: string | undefined;
+    post: DistributionGraphNode;
 }
