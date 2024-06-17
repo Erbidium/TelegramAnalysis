@@ -3,7 +3,7 @@ export interface DistributionGraphNode {
     text: string;
     similarity: number;
     similarity_with_wanted: number;
-    created_at: number;
+    created_at: Date;
     root_id?: number;
 
     channel_title: string;

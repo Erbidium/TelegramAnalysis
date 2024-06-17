@@ -8,6 +8,7 @@ import { SpinnerOverlayService } from '@core/services/spinner-overlay.service';
 import { EChartsOption } from 'echarts';
 import { DistributionAnalysisService } from "@core/services/distribution-analysis.service";
 import { ActivatedRoute } from "@angular/router";
+import * as echarts from 'echarts';
 
 @Component({
     selector: 'app-distribution-analysis-page',
@@ -20,6 +21,9 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
 
     // @ts-ignore
     treeOptions: EChartsOption;
+
+    // @ts-ignore
+    calendarOptions: EChartsOption;
 
     public searchForm = new FormGroup(
         {
@@ -77,6 +81,8 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
 
                     const tree = this.createTreeStructure(graphNodes);
                     this.setupTreeVisualization(tree);
+
+                    this.setupCalendarVisualization(graphNodes)
                 },
                 error => {
                     this.spinnerService.hide();
@@ -256,6 +262,114 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
                     animationDurationUpdate: 750,
                 },
             ],
+        };
+    }
+
+    getVirtualData(year: string) {
+        const date = +echarts.time.parse(year + '-01-01');
+        const end = +echarts.time.parse(+year + 1 + '-01-01');
+        const dayTime = 3600 * 24 * 1000;
+        const data: [string, number][] = [];
+        for (let time = date; time < end; time += dayTime) {
+            data.push([
+                echarts.time.format(time, '{yyyy}-{MM}-{dd}', false),
+                Math.floor(Math.random() * 1000)
+            ]);
+        }
+        return data;
+    }
+
+    formatDate(date: Date) {
+        return `${date.getFullYear()}-${date.getMonth().toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+    }
+
+    setupCalendarVisualization(nodes: DistributionGraphNode[]) {
+        const oldestDate = nodes.reduce((oldest, node) => {
+            return new Date(node.created_at) < oldest ? new Date(node.created_at) : oldest;
+        }, new Date(nodes[0].created_at));
+
+        const newestDate = nodes.reduce((newest, node) => {
+            return new Date(node.created_at) > newest ? new Date(node.created_at) : newest;
+        }, new Date(nodes[0].created_at));
+
+        const oldestDateStr = this.formatDate(oldestDate);
+        const newestDateStr = this.formatDate(newestDate);
+
+
+        const graphData: [string, number][] = nodes.map(node => [this.formatDate(new Date(node.created_at)), 200]);
+
+        const links = graphData.map(function (item, idx) {
+            return {
+                source: idx,
+                target: idx + 1
+            };
+        });
+        links.pop();
+
+        this.calendarOptions = {
+            tooltip: {},
+            calendar: {
+                top: 'middle',
+                left: 'center',
+                orient: 'vertical',
+                cellSize: 40,
+                yearLabel: {
+                    margin: 50,
+                    fontSize: 30
+                },
+                dayLabel: {
+                    firstDay: 1,
+                    nameMap: 'cn'
+                },
+                monthLabel: {
+                    nameMap: 'cn',
+                    margin: 15,
+                    fontSize: 20,
+                    color: '#999'
+                },
+                range: [oldestDateStr, newestDateStr]
+            },
+            visualMap: {
+                min: 0,
+                max: 1000,
+                type: 'piecewise',
+                left: 'center',
+                bottom: 20,
+                inRange: {
+                    color: ['#5291FF', '#C7DBFF']
+                },
+                seriesIndex: [1],
+                orient: 'horizontal'
+            },
+            series: [
+                {
+                    type: 'graph',
+                    edgeSymbol: ['none', 'arrow'],
+                    coordinateSystem: 'calendar',
+                    links: links,
+                    symbolSize: 15,
+                    calendarIndex: 0,
+                    itemStyle: {
+                        color: 'yellow',
+                        shadowBlur: 9,
+                        shadowOffsetX: 1.5,
+                        shadowOffsetY: 3,
+                        shadowColor: '#555'
+                    },
+                    lineStyle: {
+                        color: '#D10E00',
+                        width: 1,
+                        opacity: 1
+                    },
+                    data: graphData,
+                    z: 20
+                },
+                {
+                    type: 'heatmap',
+                    coordinateSystem: 'calendar',
+                    data: this.getVirtualData(oldestDate.getFullYear().toString())
+                }
+            ]
         };
     }
 }
