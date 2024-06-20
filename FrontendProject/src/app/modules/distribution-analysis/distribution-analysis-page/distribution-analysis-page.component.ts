@@ -307,7 +307,9 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
         links.pop();
 
         this.calendarOptions = {
-            tooltip: {},
+            tooltip: {
+                show: false
+            },
             calendar: {
                 top: 'middle',
                 left: 'center',
@@ -340,6 +342,9 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
                 },
                 seriesIndex: [1],
                 orient: 'horizontal'
+            },
+            legend: {
+                show: false
             },
             series: [
                 {
