@@ -17,7 +17,7 @@ def find_spread_by_root(root_post, post_index, root_post_embedding, posts_ordere
         post_search_result_in_graph = [p for p in similar_posts if post_id == p['post_id']]
         given_post_in_graph = post_search_result_in_graph[0] if post_search_result_in_graph else None
 
-        if similarity_result > 0.7:
+        if similarity_result > 0.75:
             if given_post_in_graph and given_post_in_graph.similarity >= similarity_result:
                 continue
             elif given_post_in_graph and given_post_in_graph.similarity < similarity_result:

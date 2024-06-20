@@ -69,7 +69,7 @@ def get_data():
         similarity_result = cosine_scores[index]
         print(similarity_result)
 
-        if similarity_result > 0.7:
+        if similarity_result > 0.75:
             oldest_post = post
             oldest_post_index = index
 
