@@ -1,9 +1,4 @@
-import os
-
-import spacy
 from flask_cors import cross_origin, CORS
-from gensim.models import Word2Vec
-from gensim.models.doc2vec import TaggedDocument
 from sqlalchemy import create_engine, select
 from models.channel import Channel
 from models.post import Post
@@ -12,15 +7,9 @@ from swagger_gen.swagger import Swagger
 from flask import Flask, jsonify, request
 from sqlalchemy.orm import sessionmaker
 from posts_search import find_spread_by_root
-from similarity_analysis.doc2vec import get_pretrained_model_ruscorpora
-from similarity_analysis.natasha_navec import get_embedding
-from text_processing import process_text_spacy, load_nltk, process_text_nltk
-
-# servername = "localhost"
-# username = "sa"
-# dbname = os.getenv("SQLSERVER_DB", "ParsingDb")
-# password = os.getenv("SQLSERVER_PASSWORD", "your_password")
-# connection_string = f"mssql+pyodbc://{username}:{password}@{servername}/{dbname}?driver=ODBC+Driver+17+for+SQL+Server"
+from sentence_transformers import SentenceTransformer, util
+import os
+os.environ['HF_HUB_DISABLE_SYMLINKS_WARNING'] = '1'
 
 servername = "(localdb)\MSSQLLocalDB"
 dbname = "parsingdb"
@@ -31,9 +20,8 @@ engine = create_engine(
 app = Flask(__name__)
 cors = CORS(app)
 
-load_nltk()
-
-nlp = spacy.load('ru_core_news_md')
+# Load pre-trained Sentence-BERT model
+model = SentenceTransformer('sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2')
 
 
 @app.route('/get_data', methods=['POST'])
@@ -45,13 +33,12 @@ nlp = spacy.load('ru_core_news_md')
 def get_data():
     input_text = request.json.get('text', '')
 
-    processed_input = process_text_nltk(input_text)
-    if not processed_input:
+    if not input_text:
         print('Invalid input text')
         return jsonify({"error": "Invalid input text"}), 400
 
-    # Natasha
-    # input_embedding = get_embedding(processed_input)
+
+    input_embedding = model.encode(input_text, convert_to_tensor=True)
 
     Session = sessionmaker(bind=engine)
     session = Session()
@@ -60,32 +47,17 @@ def get_data():
     channels = session.scalars(select(Channel)).all()
 
     posts_ordered_by_date = sorted(posts, key=lambda p: p.createdat)
-    processed_posts = []
-    for post in posts_ordered_by_date:
-        processed_post = process_text_nltk(post.text)
-        processed_posts.append(processed_post)
+    processed_posts = [post.text for post in posts_ordered_by_date]
 
+    # Compute embeddings for all posts
+    post_embeddings = model.encode(processed_posts, convert_to_tensor=True)
 
-    documents = []
-    counter = 0
-    #for pr in processed_posts:
-    documents.append(TaggedDocument(words=processed_input, tags=[f'doc{counter}']))
-    counter += 1
-    # Train the Doc2Vec model on posts texts
-    # model = Doc2Vec(documents, vector_size=100, window=5, min_count=1, workers=8)
-
-    # Train the Word2Vec model only on searched post
-    model = Word2Vec([processed_input], vector_size=100, window=5, min_count=1, workers=8)
-
-    # Train the Word2Vec model on posts texts
-    # model = Word2Vec(processed_posts, vector_size=100, window=5, min_count=1, workers=8)
-
-    # model = get_pretrained_model_ruscorpora()
+    # Find the most similar posts
+    cosine_scores = util.pytorch_cos_sim(input_embedding, post_embeddings)[0]
 
     # find the oldest post
     oldest_post = None
     oldest_post_index = None
-    oldest_post_processed = None
 
     similar_posts = []
 
@@ -94,17 +66,12 @@ def get_data():
         if len(processed_post) == 0:
             continue
 
-        # Natasha
-        # post_embedding = get_embedding(processed_post)
-        # similarity_result = cosine_similarity(input_embedding, post_embedding)
-
-        similarity_result = model.wv.n_similarity(processed_input, processed_post)
+        similarity_result = cosine_scores[index]
         print(similarity_result)
 
-        if similarity_result > 0.5:
+        if similarity_result > 0.7:
             oldest_post = post
             oldest_post_index = index
-            oldest_post_processed = processed_post
 
             channel = next((channel for channel in channels if channel.id == post.channelid), None)
 
@@ -123,7 +90,8 @@ def get_data():
     if oldest_post_index is None:
         return jsonify({"error": "Such post is not found"}), 400
 
-    find_spread_by_root(oldest_post, oldest_post_index, oldest_post_processed, posts_ordered_by_date, similar_posts, model, processed_posts, 0, channels, processed_input)
+    cosine_scores_input = util.pytorch_cos_sim(input_embedding, post_embeddings)[0]
+    find_spread_by_root(oldest_post, oldest_post_index, post_embeddings[oldest_post_index], posts_ordered_by_date, similar_posts, model, post_embeddings, channels, cosine_scores_input)
 
     print(f'Similar posts: {similar_posts}')
     return jsonify(similar_posts)
