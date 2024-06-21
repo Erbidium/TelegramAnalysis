@@ -238,9 +238,11 @@ export class DistributionAnalysisPageComponent extends BaseComponent implements 
     }
 
     setupTreeVisualization(tree: DistributionTreeNode) {
+        console.log(tree);
         this.treeOptions = {
             series: [
                 {
+                    roam: 'scale',
                     type: 'tree',
                     data: [tree],
                     symbolSize: 20,
